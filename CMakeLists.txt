@@ -10,7 +10,7 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${ROOT}/lib/${CMAKE_BUILD_TYPE}" CACHE PATH 
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${ROOT}/lib/${CMAKE_BUILD_TYPE}" CACHE PATH "Archive directory" FORCE)
 
 include_directories(include)
-include_directories(rapiedjson/include)
+include_directories(rapidjson/include)
 
 add_executable(test_docker src/test.cpp)
 
