@@ -1,2 +1,6 @@
-/docker.o
-/libdocker-cpp.so
+build/*
+lib/*
+bin/*
+
+*.so
+*.o
