@@ -376,5 +376,5 @@ std::string jsonToString(JSON_VALUE &doc) {
     buffer.Clear();
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     doc.Accept(writer);
-    return std::string(buffer.GetString());
+    return {buffer.GetString()};
 }

@@ -1,12 +1,11 @@
 #pragma once
-#define RAPIDJSON_HAS_STDSTRING 1
 
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include <curl/curl.h>
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
 
 #define JSON_DOCUMENT rapidjson::Document
 #define JSON_VALUE rapidjson::Value
