@@ -1,9 +1,9 @@
 #include "docker.h"
 
-int main(){
+int main() {
     Docker client = Docker();
 
-    JSON_DOCUMENT doc = client.docker_version(); 
+    JSON_DOCUMENT doc = client.docker_version();
     std::cout << jsonToString(doc) << std::endl;
 
     return 0;
