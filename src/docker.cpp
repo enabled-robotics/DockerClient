@@ -315,6 +315,15 @@ JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string &path
     }
 }
 
+JSON_DOCUMENT Docker::run_container(rapidjson::Document &parameters, const std::string &name) {
+    auto result = create_container(parameters, name);
+
+    auto const data = result["data"].GetObject();
+    start_container(data["Id"].GetString());
+
+    return result;
+}
+
 /*
 *  
 * END Docker Implementation

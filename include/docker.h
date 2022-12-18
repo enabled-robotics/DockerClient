@@ -64,6 +64,8 @@ public :
 
     JSON_DOCUMENT create_container(JSON_DOCUMENT &parameters, const std::string &name = "");
 
+    JSON_DOCUMENT run_container(JSON_DOCUMENT &parameters, const std::string &name = "");
+
     JSON_DOCUMENT start_container(const std::string &container_id);
 
     JSON_DOCUMENT get_container_changes(const std::string &container_id);
