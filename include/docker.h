@@ -66,6 +66,9 @@ public :
 
     JSON_DOCUMENT run_container(JSON_DOCUMENT &parameters, const std::string &name = "");
 
+    JSON_DOCUMENT put_archive(const std::string &container_id, const std::string &pathInContainer,
+                              const std::string &pathToArchive);
+
     JSON_DOCUMENT start_container(const std::string &container_id);
 
     JSON_DOCUMENT get_container_changes(const std::string &container_id);
@@ -98,6 +101,8 @@ private:
 
     JSON_DOCUMENT requestAndParse(Method method, const std::string &path, unsigned success_code = 200,
                                   JSON_DOCUMENT &param = emptyDoc, bool isReturnJson = false);
+
+    JSON_DOCUMENT requestAndParsePut(const std::string &path, const std::string &pathToArchive);
 
     JSON_DOCUMENT requestAndParseJson(Method method, const std::string &path, unsigned success_code = 200,
                                       JSON_DOCUMENT &param = emptyDoc);

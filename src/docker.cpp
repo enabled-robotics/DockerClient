@@ -50,6 +50,8 @@ e.g.
 #include "docker.h"
 #include <utility>
 #include <sstream>
+#include <fstream>
+#include <vector>
 
 /*
 *  
@@ -291,7 +293,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
         doc.AddMember("code", status, doc.GetAllocator());
         doc.AddMember("data", resp, doc.GetAllocator());
     }
-    headers = curl_slist_append(NULL, "Expect:");
+    headers = curl_slist_append(nullptr, "Expect:");
     curl_slist_free_all(headers);
     return doc;
 }
@@ -322,6 +324,75 @@ JSON_DOCUMENT Docker::run_container(rapidjson::Document &parameters, const std::
     start_container(data["Id"].GetString());
 
     return result;
+}
+
+JSON_DOCUMENT Docker::put_archive(const std::string &container_id, const std::string &pathInContainer,
+                                  const std::string &pathToArchive) {
+    std::string path = "/containers/";
+    path += container_id + std::string{"/archive?"} + pathInContainer;
+    return requestAndParsePut(path, pathToArchive);
+}
+
+JSON_DOCUMENT Docker::requestAndParsePut(const std::string &path, const std::string &pathToArchive) {
+    std::ifstream file(pathToArchive.c_str(), std::ios::binary | std::ios::ate);
+    file.unsetf(std::ios::skipws);
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<char> buffer;
+    buffer.reserve(size);
+    buffer.insert(buffer.begin(),
+                  std::istream_iterator<char>(file),
+                  std::istream_iterator<char>());
+
+    curl = curl_easy_init();
+    if (!curl) {
+        std::cout << "error while initiating curl" << std::endl;
+        curl_global_cleanup();
+        std::abort();
+    }
+    curl_slist *headers = nullptr;
+    headers = curl_slist_append(headers, "Content-Type: application/x-tar");
+
+    std::string readBuffer;
+    if (!is_remote) {
+        curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/var/run/docker.sock");
+    }
+    curl_easy_setopt(curl, CURLOPT_URL, "http:/v1.41/containers/sad_antonelli/archive?path=/home/code_runner");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buffer.data());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buffer.size());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+    res = curl_easy_perform(curl);
+    if (res != CURLE_OK)
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+    uint32_t status = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+    curl_easy_cleanup(curl);
+
+    const char *buf = readBuffer.c_str();
+    JSON_DOCUMENT doc(rapidjson::kObjectType);
+    if (status == 200) {
+        doc.AddMember("success", true, doc.GetAllocator());
+
+        JSON_VALUE dataString;
+        dataString.SetString(readBuffer.c_str(), doc.GetAllocator());
+
+        doc.AddMember("data", dataString, doc.GetAllocator());
+    } else {
+        JSON_DOCUMENT resp(&doc.GetAllocator());
+        resp.Parse(buf);
+
+        doc.AddMember("success", false, doc.GetAllocator());
+        doc.AddMember("code", status, doc.GetAllocator());
+        doc.AddMember("data", resp, doc.GetAllocator());
+    }
+    headers = curl_slist_append(nullptr, "Expect:");
+    curl_slist_free_all(headers);
+    return doc;
 }
 
 /*

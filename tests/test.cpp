@@ -1,5 +1,4 @@
 #include "docker.h"
-#include <string>
 
 void test_version() {
     Docker client = Docker();
@@ -25,7 +24,6 @@ void test_create_container() {
     rapidjson::Document params;
     if (params.Parse(createParams.c_str()).HasParseError()) {
         assert(false);
-        return;
     }
     auto result = client.create_container(params);
     std::cout << jsonToString(result["success"]) << ": ";
@@ -40,7 +38,6 @@ void test_run_container() {
     rapidjson::Document params;
     if (params.Parse(runParams.c_str()).HasParseError()) {
         assert(false);
-        return;
     }
     auto result = client.run_container(params);
     assert(result["success"].GetBool());
@@ -57,9 +54,16 @@ void test_run_container() {
     std::cout << "Container removed: " << id << std::endl;
 }
 
+void test_put_archive() {
+    std::string const id = "sad_antonelli";
+    std::string const pathInContainer = "/home/code_runner";
+    std::string const pathToTar = "/Users/d.shipilov/Shipilov/SenJun/main.cpp.tgz";
+
+    Docker client;
+    auto result = client.put_archive(id, pathInContainer, pathToTar);
+    assert(result["success"].GetBool());
+}
 
 int main() {
-    test_run_container();
-
     return 0;
 }
