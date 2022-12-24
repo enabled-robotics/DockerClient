@@ -138,7 +138,7 @@ JSON_DOCUMENT Docker::logs_container(const std::string &container_id, bool follo
     return requestAndParse(GET, path, 101);
 }
 
-JSON_DOCUMENT Docker::create_container(JSON_DOCUMENT &parameters, const std::string &name) {
+JSON_DOCUMENT Docker::create_container(const JSON_DOCUMENT &parameters, const std::string &name) {
     std::string path = "/containers/create";
     path += not name.empty() ? "?name=" + name : "";
     return requestAndParseJson(POST, path, 201, parameters);
@@ -215,7 +215,7 @@ JSON_DOCUMENT Docker::attach_to_container(const std::string &container_id, bool 
 */
 
 JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, unsigned success_code,
-                                      JSON_DOCUMENT &param, bool isReturnJson) {
+                                      const JSON_DOCUMENT &param, bool isReturnJson) {
     std::string readBuffer;
     std::string paramString;
     std::string method_str;
@@ -299,7 +299,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
 }
 
 JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string &path, unsigned success_code,
-                                          JSON_DOCUMENT &param) {
+                                          const JSON_DOCUMENT &param) {
     auto result_obj = requestAndParse(method, path, success_code, param, true);
     bool result = (result_obj.HasMember("success") && result_obj["success"].IsBool() &&
                    result_obj["success"].GetBool());
@@ -317,7 +317,7 @@ JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string &path
     }
 }
 
-JSON_DOCUMENT Docker::run_container(rapidjson::Document &parameters, const std::string &name) {
+JSON_DOCUMENT Docker::run_container(const rapidjson::Document &parameters, const std::string &name) {
     auto result = create_container(parameters, name);
 
     auto const data = result["data"].GetObject();
@@ -393,6 +393,23 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string &path, const std::str
     headers = curl_slist_append(nullptr, "Expect:");
     curl_slist_free_all(headers);
     return doc;
+}
+
+JSON_DOCUMENT Docker::exec(rapidjson::Document &createParameters, rapidjson::Document &startParameters,
+                           const std::string &container_id, const std::string &command) {
+
+
+    return {};
+}
+
+JSON_DOCUMENT Docker::execCreate(rapidjson::Document &parameters, const std::string &container_id,
+                                 const std::string &command) {
+    return rapidjson::Document();
+}
+
+JSON_DOCUMENT Docker::execStart(rapidjson::Document &parameters, const std::string &container_id,
+                                const std::string &command) {
+    return rapidjson::Document();
 }
 
 /*

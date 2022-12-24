@@ -62,12 +62,15 @@ public :
     JSON_DOCUMENT logs_container(const std::string &container_id, bool follow = false, bool o_stdout = true,
                                  bool o_stderr = false, bool timestamps = false, const std::string &tail = "all");
 
-    JSON_DOCUMENT create_container(JSON_DOCUMENT &parameters, const std::string &name = "");
+    JSON_DOCUMENT create_container(const JSON_DOCUMENT &parameters, const std::string &name = "");
 
-    JSON_DOCUMENT run_container(JSON_DOCUMENT &parameters, const std::string &name = "");
+    JSON_DOCUMENT run_container(const JSON_DOCUMENT &parameters, const std::string &name = "");
 
     JSON_DOCUMENT put_archive(const std::string &container_id, const std::string &pathInContainer,
                               const std::string &pathToArchive);
+
+    JSON_DOCUMENT exec(JSON_DOCUMENT &createParameters, JSON_DOCUMENT &startParameters, const std::string &container_id,
+                       const std::string &command);
 
     JSON_DOCUMENT start_container(const std::string &container_id);
 
@@ -100,12 +103,18 @@ private:
     static JSON_DOCUMENT emptyDoc;
 
     JSON_DOCUMENT requestAndParse(Method method, const std::string &path, unsigned success_code = 200,
-                                  JSON_DOCUMENT &param = emptyDoc, bool isReturnJson = false);
+                                  const JSON_DOCUMENT &param = emptyDoc, bool isReturnJson = false);
 
     JSON_DOCUMENT requestAndParsePut(const std::string &path, const std::string &pathToArchive);
 
     JSON_DOCUMENT requestAndParseJson(Method method, const std::string &path, unsigned success_code = 200,
-                                      JSON_DOCUMENT &param = emptyDoc);
+                                      const JSON_DOCUMENT &param = emptyDoc);
+
+    JSON_DOCUMENT execCreate(JSON_DOCUMENT &parameters, const std::string &container_id,
+                             const std::string &command);
+
+    JSON_DOCUMENT execStart(JSON_DOCUMENT &parameters, const std::string &container_id,
+                            const std::string &command);
 
     static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
         ((std::string *) userp)->append((char *) contents, size * nmemb);
