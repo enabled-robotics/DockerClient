@@ -86,12 +86,12 @@ Docker::~Docker() {
 */
 JSON_DOCUMENT Docker::system_info() {
     std::string path = "/info";
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 JSON_DOCUMENT Docker::docker_version() {
     std::string path = "/version";
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 /*
@@ -99,7 +99,7 @@ JSON_DOCUMENT Docker::docker_version() {
 */
 JSON_DOCUMENT Docker::list_images() {
     std::string path = "/images/json";
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 /*
@@ -114,17 +114,17 @@ JSON_DOCUMENT Docker::list_containers(bool all, int limit, const std::string &si
     path += param("before", before);
     path += param("size", size);
     path += param("filters", filters);
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 JSON_DOCUMENT Docker::inspect_container(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/json";
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 JSON_DOCUMENT Docker::top_container(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/top";
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 JSON_DOCUMENT Docker::logs_container(const std::string &container_id, bool follow, bool o_stdout, bool o_stderr,
@@ -135,63 +135,63 @@ JSON_DOCUMENT Docker::logs_container(const std::string &container_id, bool follo
     path += param("stderr", o_stderr);
     path += param("timestamps", timestamps);
     path += param("tail", tail);
-    return requestAndParse(GET, path, 101);
+    return requestAndParse(Method::GET, path, 101);
 }
 
 JSON_DOCUMENT Docker::create_container(const JSON_DOCUMENT &parameters, const std::string &name) {
     std::string path = "/containers/create";
     path += not name.empty() ? "?name=" + name : "";
-    return requestAndParseJson(POST, path, 201, parameters);
+    return requestAndParseJson(Method::POST, path, 201, parameters);
 }
 
 JSON_DOCUMENT Docker::start_container(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/start";
-    return requestAndParse(POST, path, 204);
+    return requestAndParse(Method::POST, path, 204);
 }
 
 JSON_DOCUMENT Docker::get_container_changes(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/changes";
-    return requestAndParseJson(GET, path);
+    return requestAndParseJson(Method::GET, path);
 }
 
 JSON_DOCUMENT Docker::stop_container(const std::string &container_id, int delay) {
     std::string path = "/containers/" + container_id + "/stop?";
     path += param("t", delay);
-    return requestAndParse(POST, path, 204);
+    return requestAndParse(Method::POST, path, 204);
 }
 
 JSON_DOCUMENT Docker::kill_container(const std::string &container_id, int signal) {
     std::string path = "/containers/" + container_id + "/kill?";
     path += param("signal", signal);
-    return requestAndParse(POST, path, 204);
+    return requestAndParse(Method::POST, path, 204);
 }
 
 JSON_DOCUMENT Docker::pause_container(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/pause";
-    return requestAndParse(POST, path, 204);
+    return requestAndParse(Method::POST, path, 204);
 }
 
 JSON_DOCUMENT Docker::wait_container(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/wait";
-    return requestAndParseJson(POST, path);
+    return requestAndParseJson(Method::POST, path);
 }
 
 JSON_DOCUMENT Docker::delete_container(const std::string &container_id, bool v, bool force) {
     std::string path = "/containers/" + container_id + "?";
     path += param("v", v);
     path += param("force", force);
-    return requestAndParse(DELETE, path, 204);
+    return requestAndParse(Method::DELETE, path, 204);
 }
 
 JSON_DOCUMENT Docker::unpause_container(const std::string &container_id) {
     std::string path = "/containers/" + container_id + "/unpause?";
-    return requestAndParse(POST, path, 204);
+    return requestAndParse(Method::POST, path, 204);
 }
 
 JSON_DOCUMENT Docker::restart_container(const std::string &container_id, int delay) {
     std::string path = "/containers/" + container_id + "/restart?";
     path += param("t", delay);
-    return requestAndParse(POST, path, 204);
+    return requestAndParse(Method::POST, path, 204);
 }
 
 JSON_DOCUMENT Docker::attach_to_container(const std::string &container_id, bool logs, bool stream, bool o_stdin,
@@ -203,7 +203,7 @@ JSON_DOCUMENT Docker::attach_to_container(const std::string &container_id, bool 
     path += param("stdout", o_stdout);
     path += param("stderr", o_stderr);
 
-    return requestAndParse(POST, path, 101);
+    return requestAndParse(Method::POST, path, 101);
 }
 //void Docker::copy_from_container(const std::string& container_id, const std::string& file_path, const std::string& dest_tar_file){}
 
@@ -222,16 +222,16 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     struct curl_slist *headers = nullptr;
     const char *paramChar;
     switch (method) {
-        case GET:
+        case Method::GET:
             method_str = "GET";
             break;
-        case POST:
+        case Method::POST:
             method_str = "POST";
             break;
-        case DELETE:
+        case Method::DELETE:
             method_str = "DELETE";
             break;
-        case PUT:
+        case Method::PUT:
             method_str = "PUT";
             break;
         default:
@@ -263,7 +263,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    if (method == POST) {
+    if (method == Method::POST) {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, paramChar);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(paramChar));
     }
@@ -410,6 +410,9 @@ JSON_DOCUMENT Docker::exec(const JSON_DOCUMENT &createParameters, const JSON_DOC
 }
 
 JSON_DOCUMENT Docker::execCreate(const JSON_DOCUMENT &parameters, const std::string &container_id) {
+    std::string path = "/containers/";
+    path += container_id + std::string{"/exec"};
+    requestAndParse(Method::POST, path, 200);
     return rapidjson::Document();
 }
 

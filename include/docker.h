@@ -10,14 +10,15 @@
 #define JSON_DOCUMENT rapidjson::Document
 #define JSON_VALUE rapidjson::Value
 
-typedef enum {
+enum class Method {
     GET,
     POST,
     DELETE,
     PUT
-} Method;
+};
 
-std::string param(const std::string &param_name, const std::string &param_value);
+std::string
+param(const std::string &param_name, const std::string &param_value);
 
 std::string param(const std::string &param_name, const char *param_value);
 
