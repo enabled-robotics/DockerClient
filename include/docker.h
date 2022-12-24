@@ -69,8 +69,8 @@ public :
     JSON_DOCUMENT put_archive(const std::string &container_id, const std::string &pathInContainer,
                               const std::string &pathToArchive);
 
-    JSON_DOCUMENT exec(JSON_DOCUMENT &createParameters, JSON_DOCUMENT &startParameters, const std::string &container_id,
-                       const std::string &command);
+    JSON_DOCUMENT exec(const JSON_DOCUMENT &createParameters, const JSON_DOCUMENT &startParameters,
+                       const std::string &container_id);
 
     JSON_DOCUMENT start_container(const std::string &container_id);
 
@@ -110,11 +110,9 @@ private:
     JSON_DOCUMENT requestAndParseJson(Method method, const std::string &path, unsigned success_code = 200,
                                       const JSON_DOCUMENT &param = emptyDoc);
 
-    JSON_DOCUMENT execCreate(JSON_DOCUMENT &parameters, const std::string &container_id,
-                             const std::string &command);
+    JSON_DOCUMENT execCreate(const JSON_DOCUMENT &parameters, const std::string &container_id);
 
-    JSON_DOCUMENT execStart(JSON_DOCUMENT &parameters, const std::string &container_id,
-                            const std::string &command);
+    JSON_DOCUMENT execStart(const JSON_DOCUMENT &parameters, const std::string &exec_id);
 
     static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
         ((std::string *) userp)->append((char *) contents, size * nmemb);

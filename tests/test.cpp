@@ -65,5 +65,6 @@ void test_put_archive() {
 }
 
 int main() {
+    test_put_archive();
     return 0;
 }

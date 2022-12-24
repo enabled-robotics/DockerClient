@@ -329,7 +329,7 @@ JSON_DOCUMENT Docker::run_container(const rapidjson::Document &parameters, const
 JSON_DOCUMENT Docker::put_archive(const std::string &container_id, const std::string &pathInContainer,
                                   const std::string &pathToArchive) {
     std::string path = "/containers/";
-    path += container_id + std::string{"/archive?"} + pathInContainer;
+    path += container_id + std::string{"/archive?path="} + pathInContainer;
     return requestAndParsePut(path, pathToArchive);
 }
 
@@ -358,7 +358,7 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string &path, const std::str
     if (!is_remote) {
         curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/var/run/docker.sock");
     }
-    curl_easy_setopt(curl, CURLOPT_URL, "http:/v1.41/containers/sad_antonelli/archive?path=/home/code_runner");
+    curl_easy_setopt(curl, CURLOPT_URL, (host_uri + path).c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buffer.data());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buffer.size());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -395,20 +395,25 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string &path, const std::str
     return doc;
 }
 
-JSON_DOCUMENT Docker::exec(rapidjson::Document &createParameters, rapidjson::Document &startParameters,
-                           const std::string &container_id, const std::string &command) {
+JSON_DOCUMENT Docker::exec(const JSON_DOCUMENT &createParameters, const JSON_DOCUMENT &startParameters,
+                           const std::string &container_id) {
+    auto const createResult = execCreate(createParameters, container_id);
+    if (!createResult.HasMember("success") || !createResult["success"].GetBool() || !createResult.HasMember("data") ||
+        !createResult["data"].IsObject() || !createResult["data"].GetObject().HasMember("Id")) {
+        return {};
+    }
+    std::string const execId = createResult["data"].GetObject()["Id"].GetString();
 
+    auto const startResult = execStart(startParameters, execId);
 
     return {};
 }
 
-JSON_DOCUMENT Docker::execCreate(rapidjson::Document &parameters, const std::string &container_id,
-                                 const std::string &command) {
+JSON_DOCUMENT Docker::execCreate(const JSON_DOCUMENT &parameters, const std::string &container_id) {
     return rapidjson::Document();
 }
 
-JSON_DOCUMENT Docker::execStart(rapidjson::Document &parameters, const std::string &container_id,
-                                const std::string &command) {
+JSON_DOCUMENT Docker::execStart(const JSON_DOCUMENT &parameters, const std::string &exec_id) {
     return rapidjson::Document();
 }
 
