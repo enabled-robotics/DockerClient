@@ -60,7 +60,8 @@ e.g.
 */
 JSON_DOCUMENT Docker::emptyDoc = JSON_DOCUMENT();
 
-Docker::Docker() : host_uri("http:/v1.41") {
+Docker::Docker()
+        : host_uri("http:/v1.41") {
     curl_global_init(CURL_GLOBAL_ALL);
     is_remote = false;
 }
@@ -249,8 +250,9 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     param.Accept(writer);
     paramString = std::string(buffer.GetString());
     paramChar = paramString.c_str();
-    if (isReturnJson)
+    if (isReturnJson) {
         headers = curl_slist_append(headers, "Accept: application/json");
+    }
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
     std::vector<char> readBuffer;
@@ -267,15 +269,16 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     }
 
     res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
+    if (res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
+    }
     unsigned status = 0;
     curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &status);
     curl_easy_cleanup(curl);
 
     std::string str;
-    for (char c : readBuffer) {
+    for (char c: readBuffer) {
         // TODO: attention! maybe this check should be in another place?
         if (c < '\x20') {
             continue;
@@ -289,7 +292,6 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
         JSON_VALUE dataString;
 
         dataString.SetString(str, doc.GetAllocator());
-
         doc.AddMember("data", dataString, doc.GetAllocator());
     } else {
         JSON_DOCUMENT resp(&doc.GetAllocator());
@@ -309,18 +311,17 @@ JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string &path
     auto result_obj = requestAndParse(method, path, success_code, param, true);
     bool result = (result_obj.HasMember("success") && result_obj["success"].IsBool() &&
                    result_obj["success"].GetBool());
-    if (result) {
-        JSON_DOCUMENT doc(rapidjson::kObjectType);
-
-        JSON_DOCUMENT data(&doc.GetAllocator());
-        data.Parse(result_obj["data"].GetString());
-
-        doc.AddMember("success", true, doc.GetAllocator());
-        doc.AddMember("data", data, doc.GetAllocator());
-        return doc;
-    } else {
+    if (!result) {
         return result_obj;
     }
+
+    JSON_DOCUMENT doc(rapidjson::kObjectType);
+    JSON_DOCUMENT data(&doc.GetAllocator());
+    data.Parse(result_obj["data"].GetString());
+
+    doc.AddMember("success", true, doc.GetAllocator());
+    doc.AddMember("data", data, doc.GetAllocator());
+    return doc;
 }
 
 JSON_DOCUMENT Docker::run_container(const rapidjson::Document &parameters, const std::string &name) {
@@ -434,17 +435,15 @@ JSON_DOCUMENT Docker::execStart(const JSON_DOCUMENT &parameters, const std::stri
 std::string param(const std::string &param_name, const std::string &param_value) {
     if (!param_value.empty()) {
         return "&" + param_name + "=" + param_value;
-    } else {
-        return "";
     }
+    return {""};
 }
 
 std::string param(const std::string &param_name, const char *param_value) {
     if (param_value != nullptr) {
         return "&" + param_name + "=" + param_value;
-    } else {
-        return "";
     }
+    return {""};
 }
 
 std::string param(const std::string &param_name, bool param_value) {
@@ -452,33 +451,32 @@ std::string param(const std::string &param_name, bool param_value) {
     ret = "&" + param_name + "=";
     if (param_value) {
         return ret + "true";
-    } else {
-        return ret + "false";
     }
+    return {ret + "false"};
 }
 
 std::string param(const std::string &param_name, int param_value) {
-    if (param_value != -1) {
-        std::ostringstream convert;
-        convert << param_value;
-        return "&" + param_name + "=" + convert.str();
-    } else {
+    if (param_value == -1) {
         return "";
     }
+
+    std::ostringstream convert;
+    convert << param_value;
+    return "&" + param_name + "=" + convert.str();
 }
 
 std::string param(const std::string &param_name, JSON_DOCUMENT &param_value) {
-    if (param_value.IsObject()) {
-        std::string paramString;
-        rapidjson::StringBuffer buffer;
-        buffer.Clear();
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        param_value.Accept(writer);
-        paramString = std::string(buffer.GetString());
-        return "&" + param_name + "=" + paramString;
-    } else {
+    if (!param_value.IsObject()) {
         return "";
     }
+
+    std::string paramString;
+    rapidjson::StringBuffer buffer;
+    buffer.Clear();
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    param_value.Accept(writer);
+    paramString = std::string(buffer.GetString());
+    return "&" + param_name + "=" + paramString;
 }
 
 std::string jsonToString(JSON_VALUE &doc) {

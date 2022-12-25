@@ -90,12 +90,6 @@ void test_exec() {
     }
 
     std::string const answer = jsonToString(result["data"]);
-    std::cout << "[0]: " << answer[0] << std::endl;
-    std::cout << "[1]: " << answer[1] << std::endl;
-    std::cout << "[2]: " << answer[2] << std::endl;
-    std::cout << "[3]: " << answer[3] << std::endl;
-
-    std::cout << "[n-1]: " << answer[answer.size()-1] << std::endl;
     std::cout << answer << std::endl;
 }
 

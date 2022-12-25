@@ -8,8 +8,8 @@
 #include <rapidjson/prettywriter.h>
 #include <vector>
 
-#define JSON_DOCUMENT rapidjson::Document
-#define JSON_VALUE rapidjson::Value
+using JSON_DOCUMENT = rapidjson::Document;
+using JSON_VALUE = rapidjson::Value;
 
 enum class Method {
     GET,
@@ -94,12 +94,11 @@ public :
 
     JSON_DOCUMENT attach_to_container(const std::string &container_id, bool logs = false, bool stream = false,
                                       bool o_stdin = false, bool o_stdout = false, bool o_stderr = false);
-    //void copy_from_container(const std::string& container_id, const std::string& file_path, const std::string& dest_tar_file);
 
 private:
     std::string host_uri;
     bool is_remote;
-    CURL *curl{};
+    CURL *curl{nullptr};
     CURLcode res{};
 
     static JSON_DOCUMENT emptyDoc;
@@ -117,9 +116,9 @@ private:
     JSON_DOCUMENT execStart(const JSON_DOCUMENT &parameters, const std::string &exec_id);
 
     static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-        std::vector<char> & data = *reinterpret_cast<std::vector<char> *>(userp);
+        std::vector<char> &data = *reinterpret_cast<std::vector<char> *>(userp);
         data.reserve(size * nmemb);
-        char const * pData = static_cast<char const *>(contents);
+        char const *pData = static_cast<char const *>(contents);
         for (size_t index = 0; index < data.capacity(); ++index) {
             data.push_back(static_cast<char>(*(pData + index)));
         }
@@ -127,4 +126,3 @@ private:
         return size * nmemb;
     }
 };
-
