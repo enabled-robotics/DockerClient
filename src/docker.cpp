@@ -216,7 +216,6 @@ JSON_DOCUMENT Docker::attach_to_container(const std::string &container_id, bool 
 
 JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, unsigned success_code,
                                       const JSON_DOCUMENT &param, bool isReturnJson) {
-    std::string readBuffer;
     std::string paramString;
     std::string method_str;
     struct curl_slist *headers = nullptr;
@@ -256,6 +255,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
 
     //std::cout << "HOST_PATH : " << (host_uri + path) << std::endl;
 
+    std::string readBuffer;
     if (!is_remote)
         curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/var/run/docker.sock");
     curl_easy_setopt(curl, CURLOPT_URL, (host_uri + path).c_str());
@@ -276,18 +276,17 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &status);
     curl_easy_cleanup(curl);
 
-    const char *buf = readBuffer.c_str();
+//    const char *buf = readBuffer.c_str();
     JSON_DOCUMENT doc(rapidjson::kObjectType);
     if (status == success_code || status == 200) {
         doc.AddMember("success", true, doc.GetAllocator());
-
         JSON_VALUE dataString;
-        dataString.SetString(readBuffer.c_str(), doc.GetAllocator());
+        dataString.SetString(readBuffer, doc.GetAllocator());
 
         doc.AddMember("data", dataString, doc.GetAllocator());
     } else {
         JSON_DOCUMENT resp(&doc.GetAllocator());
-        resp.Parse(buf);
+//        resp.Parse(buf);
 
         doc.AddMember("success", false, doc.GetAllocator());
         doc.AddMember("code", status, doc.GetAllocator());
@@ -399,25 +398,24 @@ JSON_DOCUMENT Docker::exec(const JSON_DOCUMENT &createParameters, const JSON_DOC
                            const std::string &container_id) {
     auto const createResult = execCreate(createParameters, container_id);
     if (!createResult.HasMember("success") || !createResult["success"].GetBool() || !createResult.HasMember("data") ||
-        !createResult["data"].IsObject() || !createResult["data"].GetObject().HasMember("Id")) {
+        !createResult["data"].IsObject() || !createResult["data"].GetObject().HasMember("Id") ||
+        !createResult["data"].GetObject()["Id"].IsString()) {
         return {};
     }
     std::string const execId = createResult["data"].GetObject()["Id"].GetString();
 
-    auto const startResult = execStart(startParameters, execId);
-
-    return {};
+    return execStart(startParameters, execId);
 }
 
 JSON_DOCUMENT Docker::execCreate(const JSON_DOCUMENT &parameters, const std::string &container_id) {
     std::string path = "/containers/";
     path += container_id + std::string{"/exec"};
-    requestAndParse(Method::POST, path, 200);
-    return rapidjson::Document();
+    return requestAndParseJson(Method::POST, path, 201, parameters);
 }
 
 JSON_DOCUMENT Docker::execStart(const JSON_DOCUMENT &parameters, const std::string &exec_id) {
-    return rapidjson::Document();
+    std::string path = "/exec/" + exec_id + std::string{"/start"};
+    return requestAndParse(Method::POST, path, 200, parameters);
 }
 
 /*

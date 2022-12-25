@@ -64,7 +64,34 @@ void test_put_archive() {
     assert(result["success"].GetBool());
 }
 
+void test_exec() {
+    std::string const id = "sad_antonelli";
+    std::string const strExecParams =
+            R"({"AttachStderr": true, "AttachStdout": true, "Tty": true, "Cmd": ["sh",  "run.sh", " m.py"]})";
+    rapidjson::Document execParams;
+    if (execParams.Parse(strExecParams.c_str()).HasParseError()) {
+        assert(false);
+    }
+
+    rapidjson::Document startParams;
+
+    std::string const strStartParams =
+            R"({})";
+    if (startParams.Parse(strStartParams.c_str()).HasParseError()) {
+        assert(false);
+    }
+
+    Docker client;
+    auto result = client.exec(execParams, startParams, id);
+    if (!result["success"].GetBool()) {
+        assert(false);
+    }
+
+    auto const answer = jsonToString(result["data"]);
+    std::cout << answer;
+}
+
 int main() {
-    test_put_archive();
+    test_exec();
     return 0;
 }
