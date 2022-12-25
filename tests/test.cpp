@@ -65,9 +65,11 @@ void test_put_archive() {
 }
 
 void test_exec() {
-    std::string const id = "sad_antonelli";
+    std::string const id = "objective_cori";
+
+    // m.py — file inside container for launching
     std::string const strExecParams =
-            R"({"AttachStderr": true, "AttachStdout": true, "Tty": true, "Cmd": ["sh",  "run.sh", " m.py"]})";
+            R"({"AttachStderr": true, "AttachStdout": true, "Detach": false, "Tty": true, "Cmd": ["sh",  "run.sh", " m.py"]})";
     rapidjson::Document execParams;
     if (execParams.Parse(strExecParams.c_str()).HasParseError()) {
         assert(false);
@@ -76,7 +78,7 @@ void test_exec() {
     rapidjson::Document startParams;
 
     std::string const strStartParams =
-            R"({})";
+            R"({"Detach": false, "Tty": false})";
     if (startParams.Parse(strStartParams.c_str()).HasParseError()) {
         assert(false);
     }
@@ -87,11 +89,16 @@ void test_exec() {
         assert(false);
     }
 
-    auto const answer = jsonToString(result["data"]);
-    std::cout << answer;
+    std::string const answer = jsonToString(result["data"]);
+    std::cout << "[0]: " << answer[0] << std::endl;
+    std::cout << "[1]: " << answer[1] << std::endl;
+    std::cout << "[2]: " << answer[2] << std::endl;
+    std::cout << "[3]: " << answer[3] << std::endl;
+
+    std::cout << "[n-1]: " << answer[answer.size()-1] << std::endl;
+    std::cout << answer << std::endl;
 }
 
 int main() {
-    test_exec();
     return 0;
 }
