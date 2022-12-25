@@ -253,9 +253,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
         headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
-    //std::cout << "HOST_PATH : " << (host_uri + path) << std::endl;
-
-    std::string readBuffer;
+    std::vector<char> readBuffer;
     if (!is_remote)
         curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/var/run/docker.sock");
     curl_easy_setopt(curl, CURLOPT_URL, (host_uri + path).c_str());
@@ -276,17 +274,26 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &status);
     curl_easy_cleanup(curl);
 
-//    const char *buf = readBuffer.c_str();
+    std::string str;
+    for (char c : readBuffer) {
+        // TODO: attention! maybe this check should be in another place?
+        if (c < '\x20') {
+            continue;
+        }
+        str.push_back(c);
+    }
+
     JSON_DOCUMENT doc(rapidjson::kObjectType);
     if (status == success_code || status == 200) {
         doc.AddMember("success", true, doc.GetAllocator());
         JSON_VALUE dataString;
-        dataString.SetString(readBuffer, doc.GetAllocator());
+
+        dataString.SetString(str, doc.GetAllocator());
 
         doc.AddMember("data", dataString, doc.GetAllocator());
     } else {
         JSON_DOCUMENT resp(&doc.GetAllocator());
-//        resp.Parse(buf);
+        resp.Parse(str.c_str());
 
         doc.AddMember("success", false, doc.GetAllocator());
         doc.AddMember("code", status, doc.GetAllocator());
