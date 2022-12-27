@@ -381,7 +381,6 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string &path, const std::str
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
     curl_easy_cleanup(curl);
 
-    const char *buf = readBuffer.c_str();
     JSON_DOCUMENT doc(rapidjson::kObjectType);
     if (status == 200) {
         doc.AddMember("success", true, doc.GetAllocator());
@@ -392,7 +391,7 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string &path, const std::str
         doc.AddMember("data", dataString, doc.GetAllocator());
     } else {
         JSON_DOCUMENT resp(&doc.GetAllocator());
-        resp.Parse(buf);
+        resp.Parse(readBuffer.c_str());
 
         doc.AddMember("success", false, doc.GetAllocator());
         doc.AddMember("code", status, doc.GetAllocator());
