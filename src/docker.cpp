@@ -337,7 +337,7 @@ JSON_DOCUMENT Docker::run_container(const rapidjson::Document &parameters, const
 JSON_DOCUMENT Docker::put_archive(const std::string &container_id, const std::string &pathInContainer,
                                   const std::string &pathToArchive) {
     std::string path = "/containers/";
-    path += container_id + std::string{"/archive?path="} + pathInContainer;
+    path += container_id + "/archive?path=" + pathInContainer;
     return requestAndParsePut(path, pathToArchive);
 }
 
@@ -417,12 +417,12 @@ JSON_DOCUMENT Docker::exec(const JSON_DOCUMENT &createParameters, const JSON_DOC
 
 JSON_DOCUMENT Docker::execCreate(const JSON_DOCUMENT &parameters, const std::string &container_id) {
     std::string path = "/containers/";
-    path += container_id + std::string{"/exec"};
+    path += container_id + "/exec";
     return requestAndParseJson(Method::POST, path, 201, parameters);
 }
 
 JSON_DOCUMENT Docker::execStart(const JSON_DOCUMENT &parameters, const std::string &exec_id) {
-    std::string path = "/exec/" + exec_id + std::string{"/start"};
+    std::string path = "/exec/" + exec_id + "/start";
     return requestAndParse(Method::POST, path, 200, parameters);
 }
 
