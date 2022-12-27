@@ -278,6 +278,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string &path, un
     curl_easy_cleanup(curl);
 
     std::string str;
+    str.reserve(readBuffer.size());
     for (char c: readBuffer) {
         // TODO: attention! maybe this check should be in another place?
         if (c < '\x20') {
