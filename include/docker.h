@@ -1,24 +1,25 @@
 #pragma once
-#define RAPIDJSON_HAS_STDSTRING 1
 
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include <curl/curl.h>
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <vector>
 
-#define JSON_DOCUMENT rapidjson::Document
-#define JSON_VALUE rapidjson::Value
+using JSON_DOCUMENT = rapidjson::Document;
+using JSON_VALUE = rapidjson::Value;
 
-typedef enum {
+enum class Method {
     GET,
     POST,
     DELETE,
     PUT
-} Method;
+};
 
-std::string param(const std::string &param_name, const std::string &param_value);
+std::string
+param(const std::string &param_name, const std::string &param_value);
 
 std::string param(const std::string &param_name, const char *param_value);
 
@@ -63,7 +64,15 @@ public :
     JSON_DOCUMENT logs_container(const std::string &container_id, bool follow = false, bool o_stdout = true,
                                  bool o_stderr = false, bool timestamps = false, const std::string &tail = "all");
 
-    JSON_DOCUMENT create_container(JSON_DOCUMENT &parameters, const std::string &name = "");
+    JSON_DOCUMENT create_container(const JSON_DOCUMENT &parameters, const std::string &name = "");
+
+    JSON_DOCUMENT run_container(const JSON_DOCUMENT &parameters, const std::string &name = "");
+
+    JSON_DOCUMENT put_archive(const std::string &container_id, const std::string &pathInContainer,
+                              const std::string &pathToArchive);
+
+    JSON_DOCUMENT exec(const JSON_DOCUMENT &createParameters, const JSON_DOCUMENT &startParameters,
+                       const std::string &container_id);
 
     JSON_DOCUMENT start_container(const std::string &container_id);
 
@@ -85,25 +94,35 @@ public :
 
     JSON_DOCUMENT attach_to_container(const std::string &container_id, bool logs = false, bool stream = false,
                                       bool o_stdin = false, bool o_stdout = false, bool o_stderr = false);
-    //void copy_from_container(const std::string& container_id, const std::string& file_path, const std::string& dest_tar_file);
 
 private:
     std::string host_uri;
     bool is_remote;
-    CURL *curl{};
+    CURL *curl{nullptr};
     CURLcode res{};
 
     static JSON_DOCUMENT emptyDoc;
 
     JSON_DOCUMENT requestAndParse(Method method, const std::string &path, unsigned success_code = 200,
-                                  JSON_DOCUMENT &param = emptyDoc, bool isReturnJson = false);
+                                  const JSON_DOCUMENT &param = emptyDoc, bool isReturnJson = false);
+
+    JSON_DOCUMENT requestAndParsePut(const std::string &path, const std::string &pathToArchive);
 
     JSON_DOCUMENT requestAndParseJson(Method method, const std::string &path, unsigned success_code = 200,
-                                      JSON_DOCUMENT &param = emptyDoc);
+                                      const JSON_DOCUMENT &param = emptyDoc);
+
+    JSON_DOCUMENT execCreate(const JSON_DOCUMENT &parameters, const std::string &container_id);
+
+    JSON_DOCUMENT execStart(const JSON_DOCUMENT &parameters, const std::string &exec_id);
 
     static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-        ((std::string *) userp)->append((char *) contents, size * nmemb);
+        std::vector<char> &data = *reinterpret_cast<std::vector<char> *>(userp);
+        data.reserve(size * nmemb);
+        char const *pData = static_cast<char const *>(contents);
+        for (size_t index = 0; index < data.capacity(); ++index) {
+            data.push_back(static_cast<char>(*(pData + index)));
+        }
+
         return size * nmemb;
     }
 };
-
