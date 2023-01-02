@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(DockerClient)
 
 set(CMAKE_CXX_STANDARD 20)
