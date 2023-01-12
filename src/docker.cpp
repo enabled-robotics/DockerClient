@@ -47,7 +47,7 @@ e.g.
 
 ****/
 
-#include "docker.h"
+#include "docker.hpp"
 #include <utility>
 #include <sstream>
 #include <fstream>
