@@ -132,9 +132,8 @@ private:
   static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
                               void *userp) {
     std::vector<char> &data = *reinterpret_cast<std::vector<char> *>(userp);
-    data.reserve(size * nmemb);
     char const *pData = static_cast<char const *>(contents);
-    for (size_t index = 0; index < data.capacity(); ++index) {
+    for (size_t index = 0; index < size * nmemb; ++index) {
       data.push_back(static_cast<char>(*(pData + index)));
     }
 
