@@ -26,11 +26,11 @@ std::string param(const std::string &param_name, JSON_DOCUMENT &param_value);
 
 std::string jsonToString(JSON_VALUE &doc);
 
+std::string const kDefaultHost = "http:/v1.41";
+
 class Docker {
 public:
-  Docker();
-
-  explicit Docker(std::string host);
+  explicit Docker(std::string host = kDefaultHost);
 
   ~Docker();
 

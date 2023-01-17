@@ -63,14 +63,13 @@ e.g.
  */
 JSON_DOCUMENT Docker::emptyDoc = JSON_DOCUMENT();
 
-Docker::Docker() : host_uri("http:/v1.41") {
-  curl_global_init(CURL_GLOBAL_ALL);
-  is_remote = false;
-}
-
 Docker::Docker(std::string host) : host_uri(std::move(host)) {
   curl_global_init(CURL_GLOBAL_ALL);
-  is_remote = true;
+  if (host_uri == kDefaultHost) {
+    is_remote = false;
+  } else {
+    is_remote = true;
+  }
 }
 
 Docker::~Docker() { curl_global_cleanup(); }
