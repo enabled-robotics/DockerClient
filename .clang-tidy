@@ -1,0 +1,53 @@
+Checks: >
+  *,
+  -llvmlibc-*,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  -fuchsia-overloaded-operator,
+  -fuchsia-default-arguments-calls,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -misc-non-private-member-variables-in-classes,
+  -google-readability-*,
+  -hicpp-braces-around-statements,
+  -readability-redundant-access-specifiers,
+  -readability-magic-numbers,
+  -readability-convert-member-functions-to-static,
+
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: true
+User:            perror
+CheckOptions:
+  - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value: '1'
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '2'
+  - key: readability-identifier-naming.NamespaceCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.ClassCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.StructCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.EnumCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.UnionCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.FunctionCase
+    value: 'camelBack'
+  - key: readability-identifier-naming.MethodCase
+    value: 'camelBack'
+  - key: readability-identifier-naming.ClassMemberCase
+    value: 'camelBack'
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: 'camelBack'
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: 'camelBack'
+  - key: readability-identifier-naming.VariableCase
+    value: 'camelBack'
+
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: 'm_'
+  - key: readability-identifier-naming.ProtectedMemberPrefix
+    value: 'm_'

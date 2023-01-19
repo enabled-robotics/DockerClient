@@ -1,0 +1,94 @@
+---
+IndentWidth: 4
+BreakBeforeBraces: Attach
+ColumnLimit: 100
+UseCRLF: false
+UseTab: Never
+
+
+---
+Language: Cpp
+AccessModifierOffset: -4
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakBeforeMultilineStrings: true
+AlignAfterOpenBracket: Align
+AlignOperands: AlignAfterOperator
+AllowAllArgumentsOnNextLine: true
+BinPackArguments: true
+BinPackParameters: true
+BreakConstructorInitializers: BeforeComma
+BreakBeforeBinaryOperators: NonAssignment
+BreakConstructorInitializersBeforeComma: true
+BreakStringLiterals: false
+BraceWrapping:
+  AfterStruct: false
+  AfterClass: false
+  AfterNamespace: false
+  AfterFunction: false
+  AfterControlStatement: Never
+  AfterCaseLabel: false
+  AfterEnum: false
+  AfterExternBlock: false
+  AfterUnion: false
+  BeforeLambdaBody: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+FixNamespaceComments: true
+DerivePointerAlignment: false
+IndentCaseBlocks: false
+IndentCaseLabels: false
+IndentPPDirectives: AfterHash
+IndentWrappedFunctionNames: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+PenaltyBreakAssignment: 10
+PenaltyBreakBeforeFirstCallParameter: 15
+PointerAlignment: Middle
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatementsExceptForEachMacros
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+ReflowComments: true
+Cpp11BracedListStyle: true
+Standard: c++20
+
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '.*gmock.*|.*gtest.*'
+    Priority: 8
+  - Regex: '^<.*\.h>'
+    Priority: 20
+  - Regex: '^(<boost)'
+    Priority: 50
+  - Regex: '^<.*'
+    Priority: 75
+  - Regex: '.*'
+    Priority: 10
+IncludeIsMainRegex: '$'
