@@ -296,7 +296,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     }
     headers = curl_slist_append(nullptr, "Expect:");
     curl_slist_free_all(headers);
-    return doc;
+    return std::move(doc);
 }
 
 JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string & path,
