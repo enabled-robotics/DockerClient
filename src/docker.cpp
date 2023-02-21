@@ -271,9 +271,8 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string& path, un
         doc.AddMember("code", status, doc.GetAllocator());
         doc.AddMember("data", resp, doc.GetAllocator());
     }
-    headers = curl_slist_append(NULL, "Expect:");
     curl_slist_free_all(headers);
-    return doc;
+    return std::move(doc);
 }
 
 JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string& path, unsigned success_code, JSON_DOCUMENT& param){
