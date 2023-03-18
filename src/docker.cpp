@@ -283,7 +283,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
         resp.Parse(str.c_str());
 
         doc.AddMember("success", false, doc.GetAllocator());
-        doc.AddMember("code", status, doc.GetAllocator());
+        doc.AddMember("code", static_cast<int64_t>(status), doc.GetAllocator());
         doc.AddMember("data", resp, doc.GetAllocator());
     }
     headers = curl_slist_append(nullptr, "Expect:");
@@ -379,7 +379,7 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
         resp.Parse(readBuffer);
 
         doc.AddMember("success", false, doc.GetAllocator());
-        doc.AddMember("code", status, doc.GetAllocator());
+        doc.AddMember("code", static_cast<int64_t>(status), doc.GetAllocator());
         doc.AddMember("data", resp, doc.GetAllocator());
     }
     headers = curl_slist_append(nullptr, "Expect:");
