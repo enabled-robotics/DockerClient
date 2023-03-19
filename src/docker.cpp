@@ -248,14 +248,16 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     }
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
-    std::vector<char> readBuffer;
+    std::string str;
     if (!is_remote)
         curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/var/run/docker.sock");
-    curl_easy_setopt(curl, CURLOPT_URL, (host_uri + path).c_str());
+
+    std::string const full_url = host_uri + path;
+    curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method_str.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &str);
     if (method == Method::POST) {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, paramChar);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(paramChar));
@@ -265,19 +267,9 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     if (res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
     }
-    unsigned status = 0;
+    long status = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
     curl_easy_cleanup(curl);
-
-    std::string str;
-    str.reserve(readBuffer.size());
-    for (char c : readBuffer) {
-        // TODO: attention! maybe this check should be in another place?
-        if (c < '\x20') {
-            continue;
-        }
-        str.push_back(c);
-    }
 
     JSON_DOCUMENT doc(rapidjson::kObjectType);
     if (status == success_code || status == 200) {
@@ -291,12 +283,12 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
         resp.Parse(str.c_str());
 
         doc.AddMember("success", false, doc.GetAllocator());
-        doc.AddMember("code", status, doc.GetAllocator());
+        doc.AddMember("code", static_cast<int64_t>(status), doc.GetAllocator());
         doc.AddMember("data", resp, doc.GetAllocator());
     }
     headers = curl_slist_append(nullptr, "Expect:");
     curl_slist_free_all(headers);
-    return std::move(doc);
+    return doc;
 }
 
 JSON_DOCUMENT Docker::requestAndParseJson(Method method, const std::string & path,
@@ -364,12 +356,13 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buffer.size());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
     res = curl_easy_perform(curl);
     if (res != CURLE_OK)
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-    uint32_t status = 0;
+    long status = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
     curl_easy_cleanup(curl);
 
@@ -378,15 +371,15 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
         doc.AddMember("success", true, doc.GetAllocator());
 
         JSON_VALUE dataString;
-        dataString.SetString(readBuffer.c_str(), doc.GetAllocator());
+        dataString.SetString(readBuffer, doc.GetAllocator());
 
         doc.AddMember("data", dataString, doc.GetAllocator());
     } else {
         JSON_DOCUMENT resp(&doc.GetAllocator());
-        resp.Parse(readBuffer.c_str());
+        resp.Parse(readBuffer);
 
         doc.AddMember("success", false, doc.GetAllocator());
-        doc.AddMember("code", status, doc.GetAllocator());
+        doc.AddMember("code", static_cast<int64_t>(status), doc.GetAllocator());
         doc.AddMember("data", resp, doc.GetAllocator());
     }
     headers = curl_slist_append(nullptr, "Expect:");
@@ -397,7 +390,7 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
 JSON_DOCUMENT Docker::exec(const JSON_DOCUMENT & createParameters,
                            const JSON_DOCUMENT & startParameters,
                            const std::string & container_id) {
-    auto const createResult = execCreate(createParameters, container_id);
+    JSON_DOCUMENT const createResult = execCreate(createParameters, container_id);
     if (!createResult.HasMember("success") || !createResult["success"].GetBool()
         || !createResult.HasMember("data") || !createResult["data"].IsObject()
         || !createResult["data"].GetObject().HasMember("Id")

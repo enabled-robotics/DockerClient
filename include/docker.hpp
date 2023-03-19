@@ -117,13 +117,9 @@ private:
 
     JSON_DOCUMENT execStart(const JSON_DOCUMENT & parameters, const std::string & exec_id);
 
-    static size_t WriteCallback(void * contents, size_t size, size_t nmemb, void * userp) {
-        std::vector<char> & data = *reinterpret_cast<std::vector<char> *>(userp);
-        char const * pData = static_cast<char const *>(contents);
-        for (size_t index = 0; index < size * nmemb; ++index) {
-            data.push_back(static_cast<char>(*(pData + index)));
-        }
-
+    static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
+    {
+        ((std::string*)userp)->append((char*)contents, size * nmemb);
         return size * nmemb;
     }
 };
