@@ -281,7 +281,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
         doc.AddMember("data", dataString, doc.GetAllocator());
     } else {
         JSON_DOCUMENT resp(&doc.GetAllocator());
-        resp.Parse(str.c_str());
+        resp.Parse(str);
 
         doc.AddMember("success", false, doc.GetAllocator());
         doc.AddMember("code", static_cast<int64_t>(status), doc.GetAllocator());
@@ -330,7 +330,7 @@ JSON_DOCUMENT Docker::put_archive(const std::string & container_id,
 
 JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
                                          const std::string & pathToArchive) {
-    std::ifstream file(pathToArchive.c_str(), std::ios::binary | std::ios::ate);
+    std::ifstream file(pathToArchive, std::ios::binary | std::ios::ate);
     file.unsetf(std::ios::skipws);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
