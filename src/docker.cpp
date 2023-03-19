@@ -218,7 +218,6 @@ JSON_DOCUMENT Docker::attach_to_container(const std::string & container_id, bool
 JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
                                       unsigned success_code, const JSON_DOCUMENT & param,
                                       bool isReturnJson) {
-    std::string paramString;
     std::string method_str;
     struct curl_slist * headers = nullptr;
     const char * paramChar;
@@ -240,8 +239,8 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     buffer.Clear();
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     param.Accept(writer);
-    paramString = std::string(buffer.GetString());
-    paramChar = paramString.c_str();
+    const std::string paramString = std::string(buffer.GetString());
+
     if (isReturnJson) {
         headers = curl_slist_append(headers, "Accept: application/json");
     }
@@ -260,8 +259,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);  // timeout for the URL to download
 
     if (method == Method::POST) {
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, paramChar);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(paramChar));
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, paramString.c_str());
     }
 
     res = curl_easy_perform(curl);
@@ -470,7 +468,7 @@ std::string param(const std::string & param_name, JSON_DOCUMENT & param_value) {
     return "&" + param_name + "=" + paramString;
 }
 
-std::string jsonToString(JSON_VALUE & doc) {
+std::string jsonToString(const JSON_VALUE & doc) {
     if (doc.IsString()) {
         return doc.GetString();
     }
