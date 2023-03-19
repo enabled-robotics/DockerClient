@@ -24,7 +24,7 @@ std::string param(const std::string & param_name, int param_value);
 
 std::string param(const std::string & param_name, JSON_DOCUMENT & param_value);
 
-std::string jsonToString(JSON_VALUE & doc);
+std::string jsonToString(const JSON_VALUE & doc);
 
 std::string const kDefaultHost = "http:/v1.41";
 
