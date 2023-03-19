@@ -220,7 +220,7 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
                                       bool isReturnJson) {
     std::string method_str;
     struct curl_slist * headers = nullptr;
-    const char * paramChar;
+
     switch (method) {
     case Method::GET: method_str = "GET"; break;
     case Method::POST: method_str = "POST"; break;
