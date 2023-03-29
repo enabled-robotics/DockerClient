@@ -1,54 +1,53 @@
 /****
- Dependency
- - libcurl
- - [RapidJSON](https://github.com/Tencent/rapidjson/)
+Dependency
+- libcurl
+- [RapidJSON](https://github.com/Tencent/rapidjson/)
 
 
 
- Basic Usage
+Basic Usage
 
 #include "docker.hpp"
-int main(){
-    Docker client = Docker();
+   int main(){
+   Docker client = Docker();
 
-    JSON_DOCUMENT doc = client.list_containers(true);
-    std::cout << jsonToString(doc) << std::endl;
+   JSON_DOCUMENT doc = client.list_containers(true);
+   std::cout << jsonToString(doc) << std::endl;
 
-    return 0;
+   return 0;
 }
 
 
 
- Return Type for Each Methods
+Return Type for Each Methods
 
 Object o; (rapidjson::Document)
- - success        [bool]                  : if succeeded to request
- - data           [Object/Array/string]   : actual data by server (data type
-depends on API, but it would be Object if 'success' is false)
- - code(optional) [int]                   : http status code if 'success' is
-false
+    - success        [bool]                  : if succeeded to request
+                      - data           [Object/Array/string]   : actual data by server (data type
+                                                                                  depends on API,
+but it would be Object if 'success' is false)
+                                                        - code(optional) [int]                   :
+http status code if 'success' is false
 
-e.g.
-{
-  "success": false,
-  "code": 404,
-  "data": {
-      "message": "No such container:
-5d271b3a52263330348b71948bd25cda455a49f7e7d69cfc73e6b2f3b5b41a4c"
-  }
-}
+                                                                                e.g.
+                                                                                {
+                                                                                    "success":
+false, "code": 404, "data": { "message": "No such container:
+                                                                                        5d271b3a52263330348b71948bd25cda455a49f7e7d69cfc73e6b2f3b5b41a4c"
+                                                                                    }
+                                                                                }
 
 
-{
-  "success": true ,
-  "data": {
-      "Architecture": "x86_64",
-          ...
-      "SystemTime": "2018-05-23T19:26:54.357768797+09:00"
-  }
-}
+                                                                                {
+                                                                                    "success": true
+, "data": { "Architecture": "x86_64",
+                                                                                        ...
+                                                                                        "SystemTime":
+"2018-05-23T19:26:54.357768797+09:00"
+                                                                                    }
+                                                                                }
 
-****/
+                                                                                    ****/
 
 #include "docker.hpp"
 
@@ -258,6 +257,8 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &str);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);  // timeout for the URL to download
+
     if (method == Method::POST) {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, paramChar);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(paramChar));
@@ -266,6 +267,8 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        JSON_DOCUMENT doc(rapidjson::kObjectType);
+        return doc;
     }
     long status = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
