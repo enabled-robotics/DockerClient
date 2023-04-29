@@ -322,22 +322,16 @@ JSON_DOCUMENT Docker::run_container(const rapidjson::Document & parameters,
 
 JSON_DOCUMENT Docker::put_archive(const std::string & container_id,
                                   const std::string & pathInContainer,
-                                  const std::string & pathToArchive) {
-    std::string path = "/containers/";
-    path += container_id + "/archive?path=" + pathInContainer;
-    return requestAndParsePut(path, pathToArchive);
+                                  std::ostringstream & archive) {
+    std::string path = "/containers/" + container_id + "/archive?path=" + pathInContainer;
+    return requestAndParsePut(std::move(path), archive);
 }
 
-JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
-                                         const std::string & pathToArchive) {
-    std::ifstream file(pathToArchive, std::ios::binary | std::ios::ate);
-    file.unsetf(std::ios::skipws);
-    std::streamsize size = file.tellg();
-    file.seekg(0, std::ios::beg);
 
-    std::vector<char> buffer;
-    buffer.reserve(size);
-    buffer.insert(buffer.begin(), std::istream_iterator<char>(file), std::istream_iterator<char>());
+JSON_DOCUMENT Docker::requestAndParsePut(std::string && path,
+                                         std::ostringstream & archive) {
+    std::string const content = archive.str();
+
 
     curl = curl_easy_init();
     if (!curl) {
@@ -353,8 +347,8 @@ JSON_DOCUMENT Docker::requestAndParsePut(const std::string & path,
         curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/var/run/docker.sock");
     }
     curl_easy_setopt(curl, CURLOPT_URL, (host_uri + path).c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buffer.data());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buffer.size());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.data());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, content.size());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);

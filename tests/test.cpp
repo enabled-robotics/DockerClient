@@ -1,5 +1,7 @@
 #include "docker.hpp"
 
+#include <sstream>
+
 void test_version() {
     Docker client = Docker();
 
@@ -58,10 +60,11 @@ void test_run_container() {
 void test_put_archive() {
     std::string const id = "sad_antonelli";
     std::string const pathInContainer = "/home/code_runner";
-    std::string const pathToTar = "/Users/d.shipilov/Shipilov/SenJun/main.cpp.tgz";
+
+    std::ostringstream stream(std::ios::binary | std::ios::trunc);
 
     Docker client;
-    auto result = client.put_archive(id, pathInContainer, pathToTar);
+    auto result = client.put_archive(id, pathInContainer, stream);
     assert(result["success"].GetBool());
 }
 
