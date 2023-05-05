@@ -6,4 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 include(FindCURL)
 
 add_subdirectory(src)
-add_subdirectory(tests)
+
+if (BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif ()
