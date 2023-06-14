@@ -256,7 +256,11 @@ JSON_DOCUMENT Docker::requestAndParse(Method method, const std::string & path,
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &str);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);  // timeout for the URL to download
+
+    // Timeout in seconds for communication with docker.
+    // 10 seconds is limit for user code & tests execution,
+    // 2 seconds are for HTTP overhead:
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10 + 2);
 
     if (method == Method::POST) {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, paramString.c_str());
