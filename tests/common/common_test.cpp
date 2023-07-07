@@ -1,15 +1,46 @@
+#include <gtest/gtest.h>
+
 #include "docker.hpp"
 
 #include <sstream>
 
-void test_version() {
+namespace {
+std::string runContainer() {
+    Docker client = Docker();
+
+    std::string const runParams =
+        R"({"Image": "senjun_courses_python", "Tty": true, "HostConfig": {"Memory": 7000000}})";
+    rapidjson::Document params;
+    if (params.Parse(runParams.c_str()).HasParseError()) {
+        EXPECT_TRUE(false);
+    }
+    auto result = client.run_container(params);
+    EXPECT_TRUE(result["success"].GetBool());
+    EXPECT_TRUE(result["data"].GetObject()["Id"].GetString());
+    return result["data"].GetObject()["Id"].GetString();
+}
+
+bool deleteContainer(std::string const & id) {
+    Docker client;
+    auto result = client.delete_container(id);
+    EXPECT_TRUE(result["success"].IsBool());
+
+    auto const r = result["success"].GetBool();
+    EXPECT_TRUE(r);
+    return r;
+}
+}  // namespace
+
+TEST(base, test_version) {
     Docker client = Docker();
 
     JSON_DOCUMENT doc = client.docker_version();
+    auto version = jsonToString(doc);
     std::cout << jsonToString(doc) << std::endl;
+    EXPECT_TRUE(!version.empty());
 }
 
-void test_list_images() {
+TEST(base, test_list_images) {
     Docker client = Docker();
 
     auto images = client.list_images();
@@ -17,9 +48,11 @@ void test_list_images() {
         std::cout << jsonToString(image.name) << ':';
         std::cout << jsonToString(image.value) << std::endl;
     }
+    auto const r = images["success"].GetBool();
+    EXPECT_TRUE(r);
 }
 
-void test_create_container() {
+TEST(base, test_create_container) {
     Docker client = Docker();
 
     std::string const createParams =
@@ -31,34 +64,32 @@ void test_create_container() {
     auto result = client.create_container(params);
     std::cout << jsonToString(result["success"]) << ": ";
     std::cout << jsonToString(result["data"]);
-}
-
-void test_run_container() {
-    Docker client = Docker();
-
-    std::string const runParams =
-        R"({"Image": "senjun_courses_python", "Tty": true, "HostConfig": {"Memory": 7000000}})";
-    rapidjson::Document params;
-    if (params.Parse(runParams.c_str()).HasParseError()) {
-        assert(false);
-    }
-    auto result = client.run_container(params);
-    assert(result["success"].GetBool());
-    assert(result["data"].GetObject()["Id"].GetString());
 
     std::string const id = result["data"].GetObject()["Id"].GetString();
+    result = client.delete_container(id);
+    EXPECT_TRUE(result["success"].IsBool());
+
+    auto const r = result["success"].GetBool();
+    EXPECT_TRUE(r);
+}
+
+TEST(base, test_run_container) {
+    std::string id = runContainer();
+
+    Docker client = Docker();
+
     std::cout << "Container created: " << id << std::endl;
 
-    result = client.kill_container(id);
-    assert(result["success"].GetBool());
+    auto result = client.kill_container(id);
+    EXPECT_TRUE(result["success"].GetBool());
 
     result = client.delete_container(id);
-    assert(result["success"].GetBool());
+    EXPECT_TRUE(result["success"].GetBool());
     std::cout << "Container removed: " << id << std::endl;
 }
 
-void test_put_archive() {
-    std::string const id = "sad_antonelli";
+TEST(base, test_put_archive) {
+    std::string const id = runContainer();
     std::string const pathInContainer = "/home/code_runner";
 
     std::ostringstream stream(std::ios::binary | std::ios::trunc);
@@ -66,10 +97,18 @@ void test_put_archive() {
     Docker client;
     auto result = client.put_archive(id, pathInContainer, stream);
     assert(result["success"].GetBool());
+
+    client.kill_container(id);
+
+    auto deleteResult = client.delete_container(id);
+    EXPECT_TRUE(deleteResult["success"].IsBool());
+
+    auto const r = deleteResult["success"].GetBool();
+    EXPECT_TRUE(r);
 }
 
-void test_exec() {
-    std::string const id = "objective_cori";
+TEST(base, test_exec) {
+    std::string const id = runContainer();
 
     // m.py — file inside container for launching
     std::string const strExecParams =
@@ -94,6 +133,12 @@ void test_exec() {
 
     std::string const answer = jsonToString(result["data"]);
     std::cout << answer << std::endl;
-}
 
-int main() { return 0; }
+    client.kill_container(id);
+
+    auto deleteResult = client.delete_container(id);
+    EXPECT_TRUE(deleteResult["success"].IsBool());
+
+    auto const r = deleteResult["success"].GetBool();
+    EXPECT_TRUE(r);
+}
