@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 add_library(
-        ${PROJECT_NAME} docker.cpp
+        ${PROJECT_NAME} 
+        docker.cpp
+        curl.cpp
+        docker_request_creator.cpp
+        docker_response_processor.cpp
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE RAPIDJSON_HAS_STDSTRING)
