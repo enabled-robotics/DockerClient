@@ -25,12 +25,6 @@ Docker::Docker()
 Docker::Docker(std::string host)
     : m_http(host) {}
 
-Response Docker::system_info() {
-    std::string const endpoint = "/info";
-    auto r = m_http.get(endpoint);
-    return {r.httpCode, r.data};
-}
-
 returns::Version Docker::dockerVersion() {
     std::string const endpoint = "/version";
     auto r = m_http.get(endpoint);
@@ -40,7 +34,7 @@ returns::Version Docker::dockerVersion() {
 /*
  * Images
  */
-returns::Images Docker::list_images() {
+returns::Images Docker::listImages() {
     std::string const endpoint = "/images/json";
     auto r = m_http.get(endpoint);
 
@@ -76,7 +70,7 @@ returns::Images Docker::list_images() {
  * Containers
  */
 
-returns::CreateContainer Docker::create_container(request_params::CreateContainer const & params) {
+returns::CreateContainer Docker::createContainer(request_params::CreateContainer const & params) {
     std::string endpoint = "/containers/create";
     std::string body = m_requestCreator.createContainer(params);
     auto r = m_http.post(endpoint, curl::Body{curl::DataType::Json, body});
@@ -85,7 +79,7 @@ returns::CreateContainer Docker::create_container(request_params::CreateContaine
     return {r.httpCode == kCreateContainerSuccess, id};
 }
 
-returns::StartContainer Docker::start_container(std::string const & id) {
+returns::StartContainer Docker::startContainer(std::string const & id) {
     std::string endpoint = "/containers/" + id + "/start";
     auto r = m_http.post(endpoint);
     if (r.httpCode == kStartContainerSuccess) {
@@ -96,7 +90,7 @@ returns::StartContainer Docker::start_container(std::string const & id) {
     return {false, message};
 }
 
-returns::KillContainer Docker::kill_container(request_params::KillContainer const & params) {
+returns::KillContainer Docker::killContainer(request_params::KillContainer const & params) {
     std::string query = "/containers/" + params.containerId + "/kill?";
     query += param("signal", params.signal);
 
@@ -109,7 +103,7 @@ returns::KillContainer Docker::kill_container(request_params::KillContainer cons
     return {false, message};
 }
 
-returns::DeleteContainer Docker::delete_container(request_params::RemoveContainer const & params) {
+returns::DeleteContainer Docker::deleteContainer(request_params::RemoveContainer const & params) {
     std::string path = "/containers/" + params.containerId + "?";
     path += param("v", params.volume);
     path += param("force", params.force);
@@ -118,14 +112,14 @@ returns::DeleteContainer Docker::delete_container(request_params::RemoveContaine
     return {r.httpCode == kHttpDeleteSuccess, r.data};
 }
 
-returns::RunContainer Docker::run_container(request_params::RunContainer const & params) {
-    auto result = create_container(params);
+returns::RunContainer Docker::runContainer(request_params::RunContainer const & params) {
+    auto result = createContainer(params);
     if (!result.success) {
         // log
         return {};
     }
 
-    auto r = start_container(result.containerId);
+    auto r = startContainer(result.containerId);
     if (!r.success) {
         // log r.message
         return {};
@@ -134,7 +128,7 @@ returns::RunContainer Docker::run_container(request_params::RunContainer const &
     return {true, result.containerId};
 }
 
-returns::PutArchive Docker::put_archive(request_params::PutArchive const & params) {
+returns::PutArchive Docker::putArchive(request_params::PutArchive const & params) {
     std::string path = "/containers/" + params.containerId + "/archive?path=" + params.path;
     auto r = m_http.put(path, {curl::DataType::Tar, params.archive});
     return {r.httpCode == kPutSuccess, r.data};

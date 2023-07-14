@@ -6,14 +6,7 @@
 #include "request_params.hpp"
 #include "returns.hpp"
 
-#include <vector>
-
 namespace docker {
-
-struct Response {
-    uint16_t httpCode;
-    std::string data;
-};
 
 // TODO think about param functions, refactor
 std::string param(const std::string & param_name, const std::string & param_value);
@@ -30,17 +23,15 @@ public:
 
     explicit Docker(std::string host);
 
-    Response system_info();
-
     returns::Version dockerVersion();
 
-    returns::Images list_images();
+    returns::Images listImages();
 
-    returns::CreateContainer create_container(request_params::CreateContainer const & params);
+    returns::CreateContainer createContainer(request_params::CreateContainer const & params);
 
-    returns::RunContainer run_container(request_params::RunContainer const & params);
+    returns::RunContainer runContainer(request_params::RunContainer const & params);
 
-    returns::PutArchive put_archive(request_params::PutArchive const & params);
+    returns::PutArchive putArchive(request_params::PutArchive const & params);
 
     returns::ExecCreate execCreate(request_params::ExecCreate const & params);
 
@@ -48,11 +39,11 @@ public:
 
     returns::Exec exec(request_params::ExecCreate const & params);
 
-    returns::StartContainer start_container(std::string const & id);
+    returns::StartContainer startContainer(std::string const & id);
 
-    returns::KillContainer kill_container(request_params::KillContainer const & params);
+    returns::KillContainer killContainer(request_params::KillContainer const & params);
 
-    returns::DeleteContainer delete_container(request_params::RemoveContainer const & params);
+    returns::DeleteContainer deleteContainer(request_params::RemoveContainer const & params);
 
 private:
     curl::Http m_http;

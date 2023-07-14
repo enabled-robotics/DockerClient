@@ -15,7 +15,7 @@ std::string runContainer() {
     params.tty = true;
     params.memory = 7000000;
 
-    auto result = client.run_container(params);
+    auto result = client.runContainer(params);
     EXPECT_TRUE(result.success);
     EXPECT_TRUE(!result.containerId.empty());
     return result.containerId;
@@ -32,7 +32,7 @@ TEST(base, test_version) {
 TEST(base, test_list_images) {
     Docker client = Docker();
 
-    auto imagesAnswer = client.list_images();
+    auto imagesAnswer = client.listImages();
     EXPECT_TRUE(imagesAnswer.success);
 }
 
@@ -44,13 +44,13 @@ TEST(base, test_create_container) {
     params.tty = true;
     params.memory = 7000000;
 
-    auto result = client.create_container(params);
+    auto result = client.createContainer(params);
     EXPECT_TRUE(result.success);
     EXPECT_TRUE(!result.containerId.empty());
 
     docker::request_params::RemoveContainer removeParams;
     removeParams.containerId = std::move(result.containerId);
-    auto resultDelete = client.delete_container(removeParams);
+    auto resultDelete = client.deleteContainer(removeParams);
     EXPECT_TRUE(resultDelete.success);
 }
 
@@ -63,12 +63,12 @@ TEST(base, test_run_container) {
 
     docker::request_params::KillContainer params;
     params.containerId = std::move(id);
-    auto result = client.kill_container(params);
+    auto result = client.killContainer(params);
     EXPECT_TRUE(result.success);
 
     docker::request_params::RemoveContainer removeParams;
     removeParams.containerId = std::move(params.containerId);
-    auto r = client.delete_container(removeParams);
+    auto r = client.deleteContainer(removeParams);
     EXPECT_TRUE(r.success);
     std::cout << "Container removed: " << removeParams.containerId << std::endl;
 }
@@ -86,15 +86,15 @@ TEST(base, test_put_archive) {
     params.containerId = id;
     params.path = pathInContainer;
     params.archive = tar;
-    auto result = client.put_archive(params);
+    auto result = client.putArchive(params);
     EXPECT_TRUE(result.success);
 
-    auto killResult = client.kill_container({params.containerId, {}});
+    auto killResult = client.killContainer({params.containerId, {}});
     EXPECT_TRUE(killResult.success);
 
     request_params::RemoveContainer removeParams;
     removeParams.containerId = params.containerId;
-    auto deleteResult = client.delete_container(removeParams);
+    auto deleteResult = client.deleteContainer(removeParams);
     EXPECT_TRUE(deleteResult.success);
 }
 
@@ -111,9 +111,9 @@ TEST(base, test_exec) {
     auto result = client.exec(params);
     EXPECT_TRUE(result.success);
 
-    auto killResult = client.kill_container({params.containerId, {}});
+    auto killResult = client.killContainer({params.containerId, {}});
     EXPECT_TRUE(killResult.success);
 
-    auto deleteResult = client.delete_container({params.containerId, false, false});
+    auto deleteResult = client.deleteContainer({params.containerId, false, false});
     EXPECT_TRUE(deleteResult.success);
 }
