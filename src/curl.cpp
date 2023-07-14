@@ -25,6 +25,8 @@ Http::Http(std::string url)
     curl_global_init(CURL_GLOBAL_ALL);
 }
 
+Http::~Http() { curl_global_cleanup(); }
+
 Response Http::get(std::string const & url) const { return performRequest({kGet, url, {}}); }
 
 Response Http::post(std::string const & url, std::optional<Body> && body) const {
@@ -33,8 +35,8 @@ Response Http::post(std::string const & url, std::optional<Body> && body) const 
 
 Response Http::post(std::string const & url) const { return post(url, std::nullopt); }
 
-Response Http::put(std::string const & url, Body const & body) { 
-    return performRequest({kPut, url, body}); 
+Response Http::put(std::string const & url, Body const & body) {
+    return performRequest({kPut, url, body});
 }
 
 Response Http::del(std::string const & url) const {

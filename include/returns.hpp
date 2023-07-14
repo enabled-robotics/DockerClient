@@ -19,18 +19,19 @@ struct CreateContainer : Base {
     std::string containerId;
 };
 
-struct DeleteContainer : Base {
-    std::string message;  // empty, if success
+struct CommonCase : Base {
+    std::string message;
 };
 
 struct ExecCreate : Base {
     std::string execId;
 };
 
-using KillContainer = DeleteContainer;
-using StartContainer = DeleteContainer;
-using PutArchive = DeleteContainer;
-using ExecStart = DeleteContainer;
+using DeleteContainer = CommonCase;
+using KillContainer = CommonCase;
+using StartContainer = CommonCase;
+using PutArchive = CommonCase;
+using ExecStart = CommonCase;
 using Exec = ExecStart;
 
 using RunContainer = CreateContainer;

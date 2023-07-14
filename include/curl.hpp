@@ -2,8 +2,8 @@
 
 #include <curl/curl.h>
 
-#include <string>
 #include <optional>
+#include <string>
 
 namespace curl {
 
@@ -32,6 +32,7 @@ public:
     Http();
 
     explicit Http(std::string url);
+    ~Http();
 
     Response get(std::string const & url) const;
     Response post(std::string const & url, std::optional<Body> && body) const;
