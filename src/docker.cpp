@@ -1,8 +1,5 @@
 #include "docker.hpp"
 
-#include <rapidjson/document.h>
-#include <rapidjson/prettywriter.h>
-
 #include <sstream>
 #include <vector>
 
@@ -30,45 +27,6 @@ returns::Version Docker::dockerVersion() {
     auto r = m_http.get(endpoint);
     return {r.httpCode == kHttpGetSuccess, r.data};
 }
-
-/*
- * Images
- */
-returns::Images Docker::listImages() {
-    std::string const endpoint = "/images/json";
-    auto r = m_http.get(endpoint);
-
-    rapidjson::Document document;
-    document.Parse(r.data);
-    if (document.HasParseError()) {
-        return {};
-    }
-
-    if (!document.IsArray()) {
-        return {};
-    }
-
-    std::vector<std::string> images;
-    for (auto const & element : document.GetArray()) {
-        std::string_view constexpr kTags = "RepoTags";
-        if (!element.HasMember(kTags.data())) {
-            return {};
-        }
-
-        if (!element[kTags.data()].IsArray()) {
-            return {};
-        }
-        for (auto const & tag : element[kTags.data()].GetArray()) {
-            images.push_back(tag.GetString());
-        }
-    }
-
-    return {r.httpCode == kHttpGetSuccess, std::move(images)};
-}
-
-/*
- * Containers
- */
 
 returns::CreateContainer Docker::createContainer(request_params::CreateContainer const & params) {
     std::string endpoint = "/containers/create";

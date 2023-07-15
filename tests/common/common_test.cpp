@@ -29,13 +29,6 @@ TEST(base, test_version) {
     EXPECT_TRUE(!doc.json.empty());
 }
 
-TEST(base, test_list_images) {
-    Docker client = Docker();
-
-    auto imagesAnswer = client.listImages();
-    EXPECT_TRUE(imagesAnswer.success);
-}
-
 TEST(base, test_create_container) {
     Docker client;
 

@@ -11,10 +11,6 @@ struct Version : Base {
     std::string json;  // maybe exposed if needed
 };
 
-struct Images : Base {
-    std::vector<std::string> repoTags;
-};
-
 struct CreateContainer : Base {
     std::string containerId;
 };

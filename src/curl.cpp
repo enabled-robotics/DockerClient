@@ -1,5 +1,7 @@
 #include "curl.hpp"
 
+#include <curl/curl.h>
+
 namespace curl {
 
 size_t WriteCallback(void * contents, size_t size, size_t nmemb, void * userp) {
