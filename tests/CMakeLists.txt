@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-macro(add_tests PREFIX TESTS)
+function(add_tests PREFIX TESTS)
     foreach (TEST ${TESTS})
         add_executable("${PREFIX}_${TEST}" ${TEST}.cpp)
         add_test(NAME "${PREFIX}_${TEST}" COMMAND "${PREFIX}_${TEST}")
@@ -9,7 +9,7 @@ macro(add_tests PREFIX TESTS)
                 gtest_main
                 ${PROJECT_NAME})
     endforeach ()
-endmacro()
+endfunction()
 
 add_compile_options(-Wall -Wextra -pedantic)
 add_subdirectory(common)

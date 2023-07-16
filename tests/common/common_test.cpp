@@ -2,8 +2,6 @@
 
 #include "docker.hpp"
 
-#include <sstream>
-
 using namespace docker;
 
 namespace {
