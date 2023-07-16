@@ -1,6 +1,8 @@
-#include "curl.hpp"
+#include "http.hpp"
 
 #include <curl/curl.h>
+
+#include <iostream>
 
 namespace curl {
 
@@ -50,8 +52,7 @@ Response Http::performRequest(detail::Request && request) const {
 
     CURL * curl = curl_easy_init();
     if (!curl) {
-        // todo refactor!
-        // std::cout << "error while initiating curl" << std::endl;
+        std::cerr << "error while initiating curl" << std::endl;
         curl_global_cleanup();
         exit(1);
     }
@@ -89,10 +90,9 @@ Response Http::performRequest(detail::Request && request) const {
 
     auto res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        // todo refactor error handling!
-        // JSON_DOCUMENT doc(rapidjson::kObjectType);
-        // return doc;
+        std::cerr << "curl_easy_perform error: " << curl_easy_strerror(res) << std::endl;
+        curl_global_cleanup();
+        exit(1);
     }
 
     long status = 0;  // long type is required!

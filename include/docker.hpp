@@ -1,8 +1,8 @@
 #pragma once
 
-#include "curl.hpp"
 #include "docker_request_creator.hpp"
 #include "docker_response_processor.hpp"
+#include "http.hpp"
 #include "request_params.hpp"
 #include "returns.hpp"
 
