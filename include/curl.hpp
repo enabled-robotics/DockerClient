@@ -32,6 +32,12 @@ public:
     explicit Http(std::string url);
     ~Http();
 
+    Http(Http &&) = delete;
+    Http& operator=(Http &&) = delete;
+
+    Http(Http const &) = delete;
+    Http& operator=(Http const &) = delete;
+
     Response get(std::string const & url) const;
     Response post(std::string const & url, std::optional<Body> && body) const;
     Response post(std::string const & url) const;

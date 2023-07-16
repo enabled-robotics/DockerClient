@@ -8,7 +8,7 @@ using namespace docker;
 
 namespace {
 std::string runContainer() {
-    docker::Docker client;
+    docker::Client client;
 
     request_params::RunContainer params;
     params.image = "senjun_courses_python";
@@ -23,14 +23,14 @@ std::string runContainer() {
 }  // namespace
 
 TEST(base, test_version) {
-    Docker client;
+    Client client;
 
     auto doc = client.dockerVersion();
     EXPECT_TRUE(!doc.json.empty());
 }
 
 TEST(base, test_create_container) {
-    Docker client;
+    Client client;
 
     docker::request_params::CreateContainer params;
     params.image = "senjun_courses_python";
@@ -50,7 +50,7 @@ TEST(base, test_create_container) {
 TEST(base, test_run_container) {
     std::string id = runContainer();
 
-    Docker client = Docker();
+    Client client = Client();
 
     std::cout << "Container created: " << id << std::endl;
 
@@ -73,7 +73,7 @@ TEST(base, test_put_archive) {
     std::ostringstream stream(std::ios::binary | std::ios::trunc);
     auto tar = stream.str();
 
-    Docker client;
+    Client client;
 
     request_params::PutArchive params;
     params.containerId = id;
@@ -95,7 +95,7 @@ TEST(base, test_exec) {
     std::string id = runContainer();
 
     // m.py — file inside container for launching
-    Docker client;
+    Client client;
 
     request_params::ExecCreate params;
     params.containerId = std::move(id);

@@ -8,20 +8,11 @@
 
 namespace docker {
 
-// TODO think about param functions, refactor
-std::string param(const std::string & param_name, const std::string & param_value);
-
-std::string param(const std::string & param_name, const char * param_value);
-
-std::string param(const std::string & param_name, bool param_value);
-
-std::string param(const std::string & param_name, int param_value);
-
-class Docker {
+class Client {
 public:
-    Docker();
+    Client();
 
-    explicit Docker(std::string host);
+    explicit Client(std::string host);
 
     returns::Version dockerVersion();
 
@@ -45,7 +36,7 @@ public:
 
 private:
     curl::Http m_http;
-    json::RequestCreator m_requestCreator;
-    json::ResponseProcessor m_responseProcessor;
+    json::RequestCreator m_jsonCreator;
+    json::ResponseProcessor m_jsonParser;
 };
 }  // namespace docker

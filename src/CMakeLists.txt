@@ -6,6 +6,7 @@ add_library(
         curl.cpp
         docker_request_creator.cpp
         docker_response_processor.cpp
+        query_creator.cpp
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE RAPIDJSON_HAS_STDSTRING)

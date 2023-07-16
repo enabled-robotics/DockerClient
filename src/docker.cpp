@@ -1,6 +1,7 @@
 #include "docker.hpp"
 
-#include <sstream>
+#include "query_creator.hpp"
+
 #include <vector>
 
 namespace docker {
@@ -16,61 +17,51 @@ uint16_t constexpr kExecCreateSuccess = 201;
 uint16_t constexpr kStartContainerSuccess = 204;
 uint16_t constexpr kKillContainerSuccess = 204;
 
-Docker::Docker()
+Client::Client()
     : m_http() {}
 
-Docker::Docker(std::string host)
-    : m_http(host) {}
+Client::Client(std::string host)
+    : m_http(std::move(host)) {}
 
-returns::Version Docker::dockerVersion() {
-    std::string const endpoint = "/version";
-    auto r = m_http.get(endpoint);
+returns::Version Client::dockerVersion() {
+    auto r = m_http.get(query::dockerVersion());
     return {r.httpCode == kHttpGetSuccess, r.data};
 }
 
-returns::CreateContainer Docker::createContainer(request_params::CreateContainer const & params) {
-    std::string endpoint = "/containers/create";
-    std::string body = m_requestCreator.createContainer(params);
-    auto r = m_http.post(endpoint, curl::Body{curl::DataType::Json, body});
-    std::string id = m_responseProcessor.createContainer(r.data);
+returns::CreateContainer Client::createContainer(request_params::CreateContainer const & params) {
+    std::string body = m_jsonCreator.createContainer(params);
+    auto r = m_http.post(query::createContainer(), curl::Body{curl::DataType::Json, body});
+    std::string id = m_jsonParser.createContainer(r.data);
 
     return {r.httpCode == kCreateContainerSuccess, id};
 }
 
-returns::StartContainer Docker::startContainer(std::string const & id) {
-    std::string endpoint = "/containers/" + id + "/start";
-    auto r = m_http.post(endpoint);
+returns::StartContainer Client::startContainer(std::string const & id) {
+    auto r = m_http.post(query::startContainer(id));
     if (r.httpCode == kStartContainerSuccess) {
         return {true, {}};
     }
 
-    std::string message = m_responseProcessor.startContainer(r.data);
+    std::string message = m_jsonParser.startContainer(r.data);
     return {false, message};
 }
 
-returns::KillContainer Docker::killContainer(request_params::KillContainer const & params) {
-    std::string query = "/containers/" + params.containerId + "/kill?";
-    query += param("signal", params.signal);
-
-    auto r = m_http.post(query);
+returns::KillContainer Client::killContainer(request_params::KillContainer const & params) {
+    auto r = m_http.post(query::killContainer(params));
     if (r.httpCode == kKillContainerSuccess) {
         return {true, {}};
     }
 
-    std::string message = m_responseProcessor.killContainer(r.data);
+    std::string message = m_jsonParser.killContainer(r.data);
     return {false, message};
 }
 
-returns::DeleteContainer Docker::deleteContainer(request_params::RemoveContainer const & params) {
-    std::string path = "/containers/" + params.containerId + "?";
-    path += param("v", params.volume);
-    path += param("force", params.force);
-
-    auto r = m_http.del(path);
+returns::DeleteContainer Client::deleteContainer(request_params::RemoveContainer const & params) {
+    auto r = m_http.del(query::deleteContainer(params));
     return {r.httpCode == kHttpDeleteSuccess, r.data};
 }
 
-returns::RunContainer Docker::runContainer(request_params::RunContainer const & params) {
+returns::RunContainer Client::runContainer(request_params::RunContainer const & params) {
     auto result = createContainer(params);
     if (!result.success) {
         // log
@@ -86,29 +77,27 @@ returns::RunContainer Docker::runContainer(request_params::RunContainer const & 
     return {true, result.containerId};
 }
 
-returns::PutArchive Docker::putArchive(request_params::PutArchive const & params) {
-    std::string path = "/containers/" + params.containerId + "/archive?path=" + params.path;
-    auto r = m_http.put(path, {curl::DataType::Tar, params.archive});
+returns::PutArchive Client::putArchive(request_params::PutArchive const & params) {
+    auto r = m_http.put(query::putArchive(params), {curl::DataType::Tar, params.archive});
     return {r.httpCode == kPutSuccess, r.data};
 }
 
-returns::ExecCreate Docker::execCreate(request_params::ExecCreate const & params) {
-    std::string path = "/containers/";
-    path += params.containerId + "/exec";
-    auto body = m_requestCreator.execCreate(params);
-    auto r = m_http.post(path, curl::Body{curl::DataType::Json, std::move(body)});
-    auto id = m_responseProcessor.execCreate(r.data);
+returns::ExecCreate Client::execCreate(request_params::ExecCreate const & params) {
+    auto body = m_jsonCreator.execCreate(params);
+    auto r =
+        m_http.post(query::execCreate(params), curl::Body{curl::DataType::Json, std::move(body)});
+    auto id = m_jsonParser.execCreate(r.data);
     return {r.httpCode == kExecCreateSuccess, id};
 }
 
-returns::ExecStart Docker::execStart(request_params::ExecStart const & params) {
-    std::string path = "/exec/" + params.execId + "/start";
-    auto body = m_requestCreator.execStart(params);
-    auto r = m_http.post(path, curl::Body{curl::DataType::Json, std::move(body)});
+returns::ExecStart Client::execStart(request_params::ExecStart const & params) {
+    auto body = m_jsonCreator.execStart(params);
+    auto r =
+        m_http.post(query::execStart(params), curl::Body{curl::DataType::Json, std::move(body)});
     return {r.httpCode == kExecStartSuccess, r.data};
 }
 
-returns::Exec Docker::exec(request_params::ExecCreate const & params) {
+returns::Exec Client::exec(request_params::ExecCreate const & params) {
     auto createResult = execCreate(params);
     if (!createResult.success) {
         return {};
@@ -120,39 +109,6 @@ returns::Exec Docker::exec(request_params::ExecCreate const & params) {
     }
 
     return createStart;
-}
-
-std::string param(const std::string & param_name, const std::string & param_value) {
-    if (!param_value.empty()) {
-        return "&" + param_name + "=" + param_value;
-    }
-    return {""};
-}
-
-std::string param(const std::string & param_name, const char * param_value) {
-    if (param_value != nullptr) {
-        return "&" + param_name + "=" + param_value;
-    }
-    return {""};
-}
-
-std::string param(const std::string & param_name, bool param_value) {
-    std::string ret;
-    ret = "&" + param_name + "=";
-    if (param_value) {
-        return ret + "true";
-    }
-    return {ret + "false"};
-}
-
-std::string param(const std::string & param_name, int param_value) {
-    if (param_value == -1) {
-        return "";
-    }
-
-    std::ostringstream convert;
-    convert << param_value;
-    return "&" + param_name + "=" + convert.str();
 }
 
 }  // namespace docker
