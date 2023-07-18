@@ -16,6 +16,8 @@ public:
 
     returns::Version dockerVersion();
 
+    returns::ListContainers listContainers(request_params::ListContainers const & params);
+
     returns::CreateContainer createContainer(request_params::CreateContainer const & params);
 
     returns::RunContainer runContainer(request_params::RunContainer const & params);

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <vector>
 
@@ -21,6 +23,15 @@ struct CommonCase : Base {
 
 struct ExecCreate : Base {
     std::string execId;
+};
+
+struct Container {
+    std::string id;
+    std::string image;
+};
+
+struct ListContainers : Base {
+    std::vector<Container> containers;
 };
 
 using DeleteContainer = CommonCase;

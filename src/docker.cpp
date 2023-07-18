@@ -11,6 +11,7 @@ uint16_t constexpr kHttpGetSuccess = 200;
 uint16_t constexpr kHttpDeleteSuccess = 204;
 
 uint16_t constexpr kPutSuccess = 200;
+uint16_t constexpr kListContainersSuccess = 200;
 uint16_t constexpr kCreateContainerSuccess = 201;
 uint16_t constexpr kExecStartSuccess = 200;
 uint16_t constexpr kExecCreateSuccess = 201;
@@ -26,6 +27,16 @@ Client::Client(std::string host)
 returns::Version Client::dockerVersion() {
     auto r = m_http.get(query::dockerVersion());
     return {r.httpCode == kHttpGetSuccess, r.data};
+}
+
+returns::ListContainers Client::listContainers(request_params::ListContainers const & params) {
+    auto r = m_http.get(query::listContainers(params));
+    if (r.httpCode != kListContainersSuccess) {
+        return {};
+    }
+
+    auto containers = m_jsonParser.listContainers(r.data);
+    return {true, containers};
 }
 
 returns::CreateContainer Client::createContainer(request_params::CreateContainer const & params) {

@@ -7,6 +7,8 @@ namespace docker::query {
 
 std::string dockerVersion();
 
+std::string listContainers(request_params::ListContainers const & params);
+
 std::string createContainer();
 
 std::string startContainer(std::string const & id);

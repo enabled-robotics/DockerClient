@@ -108,3 +108,21 @@ TEST(base, test_exec) {
     auto deleteResult = client.deleteContainer({params.containerId, false, false});
     EXPECT_TRUE(deleteResult.success);
 }
+
+TEST(base, test_listContainers) {
+    std::string id = runContainer();
+
+    // m.py — file inside container for launching
+    Client client;
+
+    request_params::ListContainers params;
+    params.all = true;
+
+    auto result = client.listContainers(params);
+    EXPECT_TRUE(result.success);
+    EXPECT_TRUE(!result.containers.empty());
+
+    client.killContainer({id, {}});
+    auto r = client.deleteContainer({id});
+    EXPECT_TRUE(r.success);
+}

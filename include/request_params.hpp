@@ -45,4 +45,11 @@ struct ExecStart {
     bool tty{true};
 };
 
+struct ListContainers {
+    bool all{false};
+    int32_t limit{-1};
+    bool size{false};
+    std::string filters;  // in json
+};
+
 }  // namespace docker::request_params

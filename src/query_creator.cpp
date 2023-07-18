@@ -7,12 +7,17 @@ std::string const kStart = "/start";
 std::string const kKill = "/kill";
 std::string const kArchive = "/archive";
 std::string const kExec = "/exec";
+std::string const kJson = "/json";
 
 std::string const kSlash = "/";
 std::string const kSignal = "signal";
 std::string const kForce = "force";
 std::string const kVolume = "v";
 std::string const kPath = "path";
+std::string const kAll = "all";
+std::string const kLimit = "limit";
+std::string const kSize = "size";
+std::string const kFilters = "filters";
 
 std::string const kQuestionMark = "?";
 std::string const kAmpersand = "&";
@@ -36,11 +41,35 @@ std::string makeSuffix(std::string const & paramName, std::string const & value)
     return paramName + "=" + value;
 }
 
+std::string makeSuffix(std::string const & paramName, int32_t value) {
+    return paramName + "=" + std::to_string(value);
+}
+
 }  // namespace
 
 namespace docker::query {
 
 std::string dockerVersion() { return kVersion; }
+
+std::string listContainers(request_params::ListContainers const & params) {
+    std::string query = kContainers + kJson;
+    if (!params.all && params.limit == -1 && !params.size && params.filters.empty()) {
+        return query;
+    }
+
+    query += kQuestionMark;
+
+    query += makeSuffix(kAll, params.all);
+    query += kAmpersand;
+
+    query += makeSuffix(kLimit, params.limit);
+    query += kAmpersand;
+
+    query += makeSuffix(kSize, params.size);
+
+    // todo process kFilters
+    return query;
+}
 
 std::string createContainer() { return kContainersCreate; }
 

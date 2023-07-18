@@ -1,5 +1,7 @@
 #pragma once
 
+#include "returns.hpp"
+
 #include <memory>
 #include <string>
 
@@ -13,6 +15,7 @@ public:
     std::string killContainer(std::string const & json) const;
     std::string startContainer(std::string const & json) const;
     std::string execCreate(std::string const & json) const;
+    std::vector<returns::Container> listContainers(std::string const & json) const;
 
 private:
     class Impl;
