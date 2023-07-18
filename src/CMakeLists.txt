@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 add_library(
         ${PROJECT_NAME} 
-        docker.cpp
+        client.cpp
         http.cpp
-        docker_request_creator.cpp
-        docker_response_processor.cpp
+        request_creator.cpp
+        response_processor.cpp
         query_creator.cpp
 )
 

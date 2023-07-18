@@ -1,6 +1,6 @@
-#include "docker.hpp"
+#include "docker/client.hpp"
 
-#include "query_creator.hpp"
+#include "docker/query_creator.hpp"
 
 #include <vector>
 

@@ -1,4 +1,4 @@
-#include "docker_response_processor.hpp"
+#include "docker/response_processor.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>

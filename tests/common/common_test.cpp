@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "docker.hpp"
+#include <docker/client.hpp>
 
 using namespace docker;
 
