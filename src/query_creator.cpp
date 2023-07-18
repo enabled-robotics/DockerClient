@@ -51,6 +51,11 @@ namespace docker::query {
 
 std::string dockerVersion() { return kVersion; }
 
+std::string inspectContainer(std::string const & id) {
+    std::string query = kContainers + kSlash + id + kJson;
+    return query;
+}
+
 std::string listContainers(request_params::ListContainers const & params) {
     std::string query = kContainers + kJson;
     if (!params.all && params.limit == -1 && !params.size && params.filters.empty()) {

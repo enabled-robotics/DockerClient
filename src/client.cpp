@@ -29,6 +29,15 @@ returns::Version Client::dockerVersion() {
     return {r.httpCode == kHttpGetSuccess, r.data};
 }
 
+returns::InspectContainer Client::inspectContainer(std::string const & id) {
+    auto r = m_http.get(query::inspectContainer(id));
+    if (r.httpCode != kHttpGetSuccess) {
+        return {};
+    }
+
+    bool isRunning = m_jsonParser.inspectContainer(r.data);
+    return {true, isRunning};
+}
 returns::ListContainers Client::listContainers(request_params::ListContainers const & params) {
     auto r = m_http.get(query::listContainers(params));
     if (r.httpCode != kListContainersSuccess) {

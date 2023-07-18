@@ -16,6 +16,7 @@ public:
     std::string startContainer(std::string const & json) const;
     std::string execCreate(std::string const & json) const;
     std::vector<returns::Container> listContainers(std::string const & json) const;
+    bool inspectContainer(std::string const & json) const;
 
 private:
     class Impl;

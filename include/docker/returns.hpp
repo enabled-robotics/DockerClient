@@ -34,6 +34,10 @@ struct ListContainers : Base {
     std::vector<Container> containers;
 };
 
+struct InspectContainer : Base {
+    bool isRunning{false};
+};
+
 using DeleteContainer = CommonCase;
 using KillContainer = CommonCase;
 using StartContainer = CommonCase;

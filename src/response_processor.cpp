@@ -7,6 +7,8 @@ namespace docker::json {
 
 std::string const kId = "Id";
 std::string const kImage = "Image";
+std::string const kState = "State";
+std::string const kRunning = "Running";
 
 class ResponseProcessor::Impl {
 public:
@@ -15,6 +17,7 @@ public:
     std::string startContainer(std::string const & json) const;
     std::string execCreate(std::string const & json) const;
     std::vector<returns::Container> listContainers(std::string const & json) const;
+    bool inspectContainer(std::string const & json) const;
 };
 
 std::string ResponseProcessor::Impl::createContainer(std::string const & json) const {
@@ -99,6 +102,40 @@ ResponseProcessor::Impl::listContainers(std::string const & json) const {
     return containers;
 }
 
+bool ResponseProcessor::Impl::inspectContainer(std::string const & json) const {
+    rapidjson::Document document;
+    document.Parse(json);
+
+    if (document.HasParseError()) {
+        return false;
+    }
+
+    if (!document.IsObject()) {
+        return false;
+    }
+
+    auto const & object = document.GetObject();
+    if (!object.HasMember(kState)) {
+        return false;
+    }
+
+    auto const & state = object[kState];
+    if (!state.IsObject()) {
+        return false;
+    }
+
+    if (!state.HasMember(kRunning)) {
+        return false;
+    }
+
+    auto const & running = state[kRunning];
+    if (!running.IsBool()) {
+        return false;
+    }
+
+    return running.GetBool();
+}
+
 // ResponseProcessor
 
 ResponseProcessor::ResponseProcessor()
@@ -126,4 +163,7 @@ std::vector<returns::Container> ResponseProcessor::listContainers(std::string co
     return m_impl->listContainers(json);
 }
 
+bool ResponseProcessor::inspectContainer(std::string const & json) const {
+    return m_impl->inspectContainer(json);
+}
 }  // namespace docker::json
