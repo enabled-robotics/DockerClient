@@ -1,9 +1,11 @@
 #pragma once
 
+#include "common.hpp"
+
 #include <string>
 #include <vector>
 
-namespace docker::returns {
+namespace docker::answer {
 
 struct Base {
     bool success{false};
@@ -25,17 +27,13 @@ struct ExecCreate : Base {
     std::string execId;
 };
 
-struct Container {
-    std::string id;
-    std::string image;
-};
-
 struct ListContainers : Base {
     std::vector<Container> containers;
 };
 
 struct InspectContainer : Base {
     bool isRunning{false};
+    std::string image;
 };
 
 using DeleteContainer = CommonCase;
@@ -43,8 +41,9 @@ using KillContainer = CommonCase;
 using StartContainer = CommonCase;
 using PutArchive = CommonCase;
 using ExecStart = CommonCase;
+
 using Exec = ExecStart;
 
 using RunContainer = CreateContainer;
 
-}  // namespace docker::returns
+}  // namespace docker::answer

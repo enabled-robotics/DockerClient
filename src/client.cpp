@@ -24,12 +24,12 @@ Client::Client()
 Client::Client(std::string host)
     : m_http(std::move(host)) {}
 
-returns::Version Client::dockerVersion() {
+answer::Version Client::dockerVersion() {
     auto r = m_http.get(query::dockerVersion());
     return {r.httpCode == kHttpGetSuccess, r.data};
 }
 
-returns::InspectContainer Client::inspectContainer(std::string const & id) {
+answer::InspectContainer Client::inspectContainer(std::string const & id) {
     auto r = m_http.get(query::inspectContainer(id));
     if (r.httpCode != kHttpGetSuccess) {
         return {};
@@ -38,7 +38,7 @@ returns::InspectContainer Client::inspectContainer(std::string const & id) {
     bool isRunning = m_jsonParser.inspectContainer(r.data);
     return {true, isRunning};
 }
-returns::ListContainers Client::listContainers(request_params::ListContainers const & params) {
+answer::ListContainers Client::listContainers(request_params::ListContainers const & params) {
     auto r = m_http.get(query::listContainers(params));
     if (r.httpCode != kListContainersSuccess) {
         return {};
@@ -48,7 +48,7 @@ returns::ListContainers Client::listContainers(request_params::ListContainers co
     return {true, containers};
 }
 
-returns::CreateContainer Client::createContainer(request_params::CreateContainer const & params) {
+answer::CreateContainer Client::createContainer(request_params::CreateContainer const & params) {
     std::string body = m_jsonCreator.createContainer(params);
     auto r = m_http.post(query::createContainer(), curl::Body{curl::DataType::Json, body});
     std::string id = m_jsonParser.createContainer(r.data);
@@ -56,7 +56,7 @@ returns::CreateContainer Client::createContainer(request_params::CreateContainer
     return {r.httpCode == kCreateContainerSuccess, id};
 }
 
-returns::StartContainer Client::startContainer(std::string const & id) {
+answer::StartContainer Client::startContainer(std::string const & id) {
     auto r = m_http.post(query::startContainer(id));
     if (r.httpCode == kStartContainerSuccess) {
         return {true, {}};
@@ -66,7 +66,7 @@ returns::StartContainer Client::startContainer(std::string const & id) {
     return {false, message};
 }
 
-returns::KillContainer Client::killContainer(request_params::KillContainer const & params) {
+answer::KillContainer Client::killContainer(request_params::KillContainer const & params) {
     auto r = m_http.post(query::killContainer(params));
     if (r.httpCode == kKillContainerSuccess) {
         return {true, {}};
@@ -76,12 +76,12 @@ returns::KillContainer Client::killContainer(request_params::KillContainer const
     return {false, message};
 }
 
-returns::DeleteContainer Client::deleteContainer(request_params::RemoveContainer const & params) {
+answer::DeleteContainer Client::deleteContainer(request_params::RemoveContainer const & params) {
     auto r = m_http.del(query::deleteContainer(params));
     return {r.httpCode == kHttpDeleteSuccess, r.data};
 }
 
-returns::RunContainer Client::runContainer(request_params::RunContainer const & params) {
+answer::RunContainer Client::runContainer(request_params::RunContainer const & params) {
     auto result = createContainer(params);
     if (!result.success) {
         // log
@@ -97,12 +97,12 @@ returns::RunContainer Client::runContainer(request_params::RunContainer const & 
     return {true, result.containerId};
 }
 
-returns::PutArchive Client::putArchive(request_params::PutArchive const & params) {
+answer::PutArchive Client::putArchive(request_params::PutArchive const & params) {
     auto r = m_http.put(query::putArchive(params), {curl::DataType::Tar, params.archive});
     return {r.httpCode == kPutSuccess, r.data};
 }
 
-returns::ExecCreate Client::execCreate(request_params::ExecCreate const & params) {
+answer::ExecCreate Client::execCreate(request_params::ExecCreate const & params) {
     auto body = m_jsonCreator.execCreate(params);
     auto r =
         m_http.post(query::execCreate(params), curl::Body{curl::DataType::Json, std::move(body)});
@@ -110,14 +110,14 @@ returns::ExecCreate Client::execCreate(request_params::ExecCreate const & params
     return {r.httpCode == kExecCreateSuccess, id};
 }
 
-returns::ExecStart Client::execStart(request_params::ExecStart const & params) {
+answer::ExecStart Client::execStart(request_params::ExecStart const & params) {
     auto body = m_jsonCreator.execStart(params);
     auto r =
         m_http.post(query::execStart(params), curl::Body{curl::DataType::Json, std::move(body)});
     return {r.httpCode == kExecStartSuccess, r.data};
 }
 
-returns::Exec Client::exec(request_params::ExecCreate const & params) {
+answer::Exec Client::exec(request_params::ExecCreate const & params) {
     auto createResult = execCreate(params);
     if (!createResult.success) {
         return {};

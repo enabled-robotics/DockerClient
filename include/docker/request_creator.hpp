@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 
+// Create body for post requests
 namespace docker::json {
 
 class RequestCreator {

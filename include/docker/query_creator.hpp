@@ -2,7 +2,7 @@
 
 #include <string>
 
-
+// Create url query for docker API
 namespace docker::query {
 
 std::string dockerVersion();
@@ -25,4 +25,4 @@ std::string execCreate(request_params::ExecCreate const & params);
 
 std::string execStart(request_params::ExecStart const & params);
 
-}  // namespace query
+}  // namespace docker::query

@@ -16,7 +16,7 @@ public:
     std::string killContainer(std::string const & json) const;
     std::string startContainer(std::string const & json) const;
     std::string execCreate(std::string const & json) const;
-    std::vector<returns::Container> listContainers(std::string const & json) const;
+    std::vector<Container> listContainers(std::string const & json) const;
     bool inspectContainer(std::string const & json) const;
 };
 
@@ -77,8 +77,7 @@ std::string ResponseProcessor::Impl::execCreate(std::string const & json) const 
     return createContainer(json);
 }
 
-std::vector<returns::Container>
-ResponseProcessor::Impl::listContainers(std::string const & json) const {
+std::vector<Container> ResponseProcessor::Impl::listContainers(std::string const & json) const {
     rapidjson::Document document;
     document.Parse(json);
 
@@ -90,7 +89,7 @@ ResponseProcessor::Impl::listContainers(std::string const & json) const {
         return {};
     }
 
-    std::vector<returns::Container> containers;
+    std::vector<Container> containers;
     for (auto const & object : document.GetArray()) {
         if (!object.HasMember(kId) || !object.HasMember(kImage)) {
             return {};
@@ -115,6 +114,10 @@ bool ResponseProcessor::Impl::inspectContainer(std::string const & json) const {
     }
 
     auto const & object = document.GetObject();
+    if (!object.HasMember(kImage)) {
+        return false;
+    }
+
     if (!object.HasMember(kState)) {
         return false;
     }
@@ -159,7 +162,7 @@ std::string ResponseProcessor::execCreate(std::string const & json) const {
     return m_impl->execCreate(json);
 }
 
-std::vector<returns::Container> ResponseProcessor::listContainers(std::string const & json) const {
+std::vector<Container> ResponseProcessor::listContainers(std::string const & json) const {
     return m_impl->listContainers(json);
 }
 

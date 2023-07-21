@@ -1,10 +1,11 @@
 #pragma once
 
-#include "returns.hpp"
+#include "answer.hpp"
 
 #include <memory>
 #include <string>
 
+// Parse body from docker
 namespace docker::json {
 class ResponseProcessor {
 public:
@@ -15,7 +16,7 @@ public:
     std::string killContainer(std::string const & json) const;
     std::string startContainer(std::string const & json) const;
     std::string execCreate(std::string const & json) const;
-    std::vector<returns::Container> listContainers(std::string const & json) const;
+    std::vector<Container> listContainers(std::string const & json) const;
     bool inspectContainer(std::string const & json) const;
 
 private:
