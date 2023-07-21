@@ -112,7 +112,6 @@ TEST(base, test_exec) {
 TEST(base, test_listContainers) {
     std::string id = runContainer();
 
-    // m.py — file inside container for launching
     Client client;
 
     request_params::ListContainers params;
@@ -130,7 +129,6 @@ TEST(base, test_listContainers) {
 TEST(base, test_inspectContainer) {
     std::string id = runContainer();
 
-    // m.py — file inside container for launching
     Client client;
     auto result = client.inspectContainer(id);
     EXPECT_TRUE(result.success);
