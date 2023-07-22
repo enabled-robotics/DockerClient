@@ -68,6 +68,7 @@ Response Http::performRequest(detail::Request && request) const {
 
         if (!request.body->data.empty()) {
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.body->data.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request.body->data.size());
         }
     }
 
