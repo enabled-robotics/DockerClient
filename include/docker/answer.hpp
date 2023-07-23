@@ -32,8 +32,7 @@ struct ListContainers : Base {
 };
 
 struct InspectContainer : Base {
-    bool isRunning{false};
-    std::string image;
+    InspectContainerInfo info;
 };
 
 using DeleteContainer = CommonCase;

@@ -35,8 +35,8 @@ answer::InspectContainer Client::inspectContainer(std::string const & id) {
         return {};
     }
 
-    bool isRunning = m_jsonParser.inspectContainer(r.data);
-    return {true, isRunning};
+    auto info = m_jsonParser.inspectContainer(r.data);
+    return {true, info};
 }
 answer::ListContainers Client::listContainers(request_params::ListContainers const & params) {
     auto r = m_http.get(query::listContainers(params));

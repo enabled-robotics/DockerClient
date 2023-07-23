@@ -5,6 +5,7 @@
 
 namespace docker::json {
 
+std::string const kConfig = "Config";
 std::string const kId = "Id";
 std::string const kImage = "Image";
 std::string const kState = "State";
@@ -17,7 +18,7 @@ public:
     std::string startContainer(std::string const & json) const;
     std::string execCreate(std::string const & json) const;
     std::vector<Container> listContainers(std::string const & json) const;
-    bool inspectContainer(std::string const & json) const;
+    InspectContainerInfo inspectContainer(std::string const & json) const;
 };
 
 std::string ResponseProcessor::Impl::createContainer(std::string const & json) const {
@@ -101,42 +102,60 @@ std::vector<Container> ResponseProcessor::Impl::listContainers(std::string const
     return containers;
 }
 
-bool ResponseProcessor::Impl::inspectContainer(std::string const & json) const {
+InspectContainerInfo ResponseProcessor::Impl::inspectContainer(std::string const & json) const {
     rapidjson::Document document;
     document.Parse(json);
 
     if (document.HasParseError()) {
-        return false;
+        return {};
     }
 
     if (!document.IsObject()) {
-        return false;
+        return {};
     }
 
     auto const & object = document.GetObject();
+
+    if (!object.HasMember(kConfig)) {
+        return {};
+    }
+
+    if (!object[kConfig].IsObject()) {
+        return {};
+    }
+
+    auto const & config = object[kConfig].GetObject();
+    if (!config.HasMember(kImage)) {
+        return {};
+    }
+
+    if (!config[kImage].IsString()) {
+        return {};
+    }
+
     if (!object.HasMember(kImage)) {
-        return false;
+        return {};
     }
 
     if (!object.HasMember(kState)) {
-        return false;
+        return {};
     }
 
     auto const & state = object[kState];
     if (!state.IsObject()) {
-        return false;
+        return {};
     }
 
     if (!state.HasMember(kRunning)) {
-        return false;
+        return {};
     }
 
     auto const & running = state[kRunning];
     if (!running.IsBool()) {
-        return false;
+        return {};
     }
 
-    return running.GetBool();
+    return {running.GetBool(), config[kImage].GetString()};
 }
 
 // ResponseProcessor
@@ -166,7 +185,7 @@ std::vector<Container> ResponseProcessor::listContainers(std::string const & jso
     return m_impl->listContainers(json);
 }
 
-bool ResponseProcessor::inspectContainer(std::string const & json) const {
+InspectContainerInfo ResponseProcessor::inspectContainer(std::string const & json) const {
     return m_impl->inspectContainer(json);
 }
 }  // namespace docker::json
