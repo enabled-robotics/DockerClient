@@ -132,7 +132,7 @@ TEST(base, test_inspectContainer) {
     Client client;
     auto result = client.inspectContainer(id);
     EXPECT_TRUE(result.success);
-    EXPECT_TRUE(result.isRunning);
+    EXPECT_TRUE(result.info.isRunning);
 
     client.killContainer({id, {}});
     auto r = client.deleteContainer({id});
