@@ -67,7 +67,7 @@ Response Http::performRequest(detail::Request && request) const {
         }
 
         if (!request.body->data.empty()) {
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.body->data.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.body->data.data());
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request.body->data.size());
         }
     }
@@ -78,8 +78,8 @@ Response Http::performRequest(detail::Request && request) const {
     }
 
     std::string const full_url = m_baseUrl + request.url;
-    curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, request.method);
+    curl_easy_setopt(curl, CURLOPT_URL, full_url.data());
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, request.method.data());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &str);
