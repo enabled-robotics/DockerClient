@@ -11,6 +11,7 @@ struct CreateContainer {
     std::string image;
     bool tty{true};
     uint64_t memory{0};  // bytes
+    bool networkDisabled{true};
 };
 
 struct RemoveContainer {
