@@ -9,6 +9,7 @@ std::string_view constexpr kImage = "Image";
 std::string_view constexpr kTty = "Tty";
 std::string_view constexpr kHostConfig = "HostConfig";
 std::string_view constexpr kMemory = "Memory";
+std::string_view constexpr kNetworkDisabled = "NetworkDisabled";
 
 // ExecCreate
 std::string_view constexpr kAttachStderr = "AttachStderr";
@@ -40,6 +41,9 @@ std::string RequestCreator::Impl::createContainer(request_params::CreateContaine
 
     m_writer.Key(kTty.data());
     m_writer.Bool(params.tty);
+
+    m_writer.Key(kNetworkDisabled.data());
+    m_writer.Bool(params.networkDisabled);
 
     m_writer.Key(kHostConfig.data());
     m_writer.StartObject();
