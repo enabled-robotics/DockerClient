@@ -9,6 +9,6 @@ add_subdirectory(src)
 
 if (BUILD_TESTING)
     enable_testing()
-    add_subdirectory(vendor/googletest-1.13.0)
+    add_subdirectory(vendor/googletest-1.15.0)
     add_subdirectory(tests)
 endif ()
