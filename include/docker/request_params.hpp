@@ -31,6 +31,7 @@ struct PutArchive {
     std::string containerId;
     std::string path;
     std::string archive;  // in memory tar archive
+    std::string copyUIDGID; // If 1 or true, then it will copy UID/GID to the dest file or dir
 };
 
 struct ExecCreate {
